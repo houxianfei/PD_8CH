@@ -11,7 +11,7 @@
 | RTL自动仿真 | 四个testbench均PASS | `scripts/test.ps1` |
 | 管脚完整性及唯一性 | PASS，28个信号，无缺失/重复 | `scripts/check_pins.tcl` |
 | Quartus完整编译 | Successful，0 errors、8 warnings | `scripts/build.ps1 -Mode compile` |
-| SOF | 已生成，358695字节 | `par/output_files/PD.sof` |
+| SOF | 已生成，358692字节 | `par/output_files/PD.sof` |
 | SDC/CDC端点脚本 | PASS；完整编译后执行有1条-post_map忽略提示 | `scripts/build.ps1 -Mode timing` |
 | 实板下载/八路输入/USB长期采集 | 本次文档复核未执行 | 按[入门指南](getting_started.md)另行记录 |
 

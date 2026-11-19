@@ -1,6 +1,6 @@
 # PD 8CH 主机协议
 
-固件依据当前 `project_0/rtl` 及 `sim/reference_vectors.vh`；参考 CRC 黄金向量源于 `afs_fireware` 的 `afs_v1 ae1a285`。本软件不修改固件接口或管脚。
+固件依据当前 `project_0/rtl` 及 `sim/reference_vectors.vh`；参考 CRC 黄金向量源于 `afs_fireware` 的 `afs_v1 ae1a285`。既有采集协议和全部管脚保持，新增F4只读固件版本寄存器。
 
 v1.0.0增加可通过公开SDK调用的Simulation传输。它模拟0x00～0x07 ADC读取、F0/F1/F2控制、F3状态及F4版本读取，按实时节拍生成双组八通道上传帧和CRC，复用以下解析及生命周期流程；不会访问USB或修改固件。SDK及界面演示见simulation.md。
 
