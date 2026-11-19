@@ -1,0 +1,36 @@
+﻿# format,AFS8CH_REALTIME_CSV_V2
+# software_version,"1.4.0"
+# data_source,hardware
+# timestamp_timezone,UTC
+# timestamp_source,host_start_command_plus_fpga_relative_timestamp
+# acquisition_start_utc,2026-11-19T00:00:00.123456Z
+# acquisition_end_utc,2026-11-19T00:00:00.143456Z
+# data_start_utc,2026-11-19T00:00:00.123456Z
+# data_end_utc,2026-11-19T00:00:00.133456Z
+# exported_at_utc,2026-11-19T10:52:55.236175Z
+# snapshot_at_utc,2026-11-19T00:00:00.148456Z
+# acquisition_state,"Connected"
+# acquisition_status,"Finite acquisition ended."
+# device_serial,"TEST232H"
+# mode,finite
+# sample_rate_hz,1000
+# upload_interval_ticks,49999
+# requested_duration_s,0.011
+# requested_sample_count,11
+# selected_channel_count,2
+# exported_sample_count,3
+# received_sample_count,3
+# overwritten_sample_count,0
+# crc_errors,0
+# discarded_bytes,0
+# timestamp_gaps,8
+# acquisition_warning,"Example only, no hardware"
+# calibration_formula,Power = P1 * (P0 + ADC)
+# calibration_applied_at,export
+# calibration_file,"cfg/custom, calibration.cfg"
+# channel,CH1,"Probe ""A"", east",P0,2,P1,3
+# channel,CH3,"Probe B",P0,0.5,P1,-2
+timestamp_utc,"CH1 [Probe ""A"", east] ADC","CH1 [Probe ""A"", east] Power","CH3 [Probe B] ADC","CH3 [Probe B] Power"
+2026-11-19T00:00:00.123456Z,10,36,-5,9
+2026-11-19T00:00:00.124456Z,20,66,0,-1
+2026-11-19T00:00:00.133456Z,30,96,5,-11

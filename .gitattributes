@@ -1,0 +1,4 @@
+# Keep signed driver packages and recorded third-party hashes byte-for-byte.
+software/driver/** -text
+software/vendor/** -text
+software/third_party/** -text

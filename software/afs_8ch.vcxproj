@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{10D4A536-4901-41AD-B58F-7CB9798F27B2}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries>
+    <UseDebugLibraries Condition="'$(Configuration)'=='Release'">false</UseDebugLibraries>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <PropertyGroup>
+    <OutDir>$(ProjectDir)build\v1.4.0\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)build\obj\afs_8ch\$(Configuration)\</IntDir>
+    <TargetName>afs_8ch</TargetName>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;NOMINMAX;UNICODE;_UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)src;$(ProjectDir)app;$(ProjectDir)third_party\imgui;$(ProjectDir)third_party\implot;$(ProjectDir)vendor\ftdi;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary Condition="'$(Configuration)'=='Debug'">MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)'=='Release'">MultiThreaded</RuntimeLibrary>
+      <Optimization Condition="'$(Configuration)'=='Debug'">Disabled</Optimization>
+      <Optimization Condition="'$(Configuration)'=='Release'">MaxSpeed</Optimization>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;d3dcompiler.lib;comdlg32.lib;shell32.lib;ole32.lib;dwmapi.lib;imm32.lib;ftd2xx.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)vendor\ftdi;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="app\afs_gui.cpp" />
+    <ClCompile Include="src\ui\ui.cpp" />
+    <ClCompile Include="src\driver\afs_driver.cpp" />
+    <ClCompile Include="src\driver\internal\protocol.cpp" />
+    <ClCompile Include="src\driver\internal\simulation_transport.cpp" />
+    <ClCompile Include="src\driver\internal\usb2_transport.cpp" />
+    <ClCompile Include="third_party\imgui\imgui.cpp" />
+    <ClCompile Include="third_party\imgui\imgui_draw.cpp" />
+    <ClCompile Include="third_party\imgui\imgui_tables.cpp" />
+    <ClCompile Include="third_party\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="third_party\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="third_party\imgui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="third_party\implot\implot.cpp" />
+    <ClCompile Include="third_party\implot\implot_items.cpp" />
+    <ClInclude Include="app\app_version.h" />
+    <ClInclude Include="include\afs\afs_driver.h" />
+    <ClInclude Include="src\ui\ui.h" />
+    <ClInclude Include="src\driver\internal\protocol.h" />
+    <ClInclude Include="src\driver\internal\transport.h" />
+    <ResourceCompile Include="app\afs_gui.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Target Name="CopyD2XXRuntime" AfterTargets="Build">
+    <Copy SourceFiles="$(ProjectDir)driver\CDM\amd64\ftd2xx64.dll" DestinationFiles="$(OutDir)ftd2xx.dll" />
+  </Target>
+  <ItemGroup>
+    <ClCompile Include="src\ui\settings.cpp" />
+    <ClInclude Include="src\ui\settings.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\ui\performance.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\ui\frame_pacer.h" />
+    <ClInclude Include="src\ui\performance_report.h" />
+  </ItemGroup>
+</Project>

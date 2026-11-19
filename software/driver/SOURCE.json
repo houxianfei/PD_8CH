@@ -1,0 +1,109 @@
+{
+  "url": "https://ftdichip.cn/Drivers/CDM/CDM%20v2.12.36.4%20WHQL%20Certified.zip",
+  "sha256": "a8654caa76151e92161e2767294337039189ac3bab3a794dbac791cd1901172b",
+  "bytes": 1491755,
+  "package": "FTDI CDM 2.12.36.4 WHQL Certified",
+  "inf_driver_version": "07/05/2021,2.12.36.4",
+  "primary_download_page": "https://ftdichip.com/drivers/d2xx-drivers/",
+  "download_page_used": "https://ftdichip.cn/Drivers/D2XX.htm",
+  "primary_download_result": "HTTP 403; downloaded archive linked by the FTDI China D2XX page instead.",
+  "retrieved_local_date": "2026-11-19",
+  "x64_runtime_file": "CDM/amd64/ftd2xx64.dll",
+  "app_runtime_name": "ftd2xx.dll",
+  "signature_status": "Valid (PowerShell Get-AuthenticodeSignature)",
+  "signature_subject": "CN=Microsoft Windows Hardware Compatibility Publisher, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+  "files": [
+    {
+      "file": "CDM/amd64/ftbusui.dll",
+      "sha256": "4bbc0b301a7c5a6b1b73878ce3aeeb191f5fceac05835372142206d79ac81559"
+    },
+    {
+      "file": "CDM/amd64/ftcserco.dll",
+      "sha256": "c0224b9ef14365f6dda96134cc77d978e69fbd61efdade6fd1eb676418c41023"
+    },
+    {
+      "file": "CDM/amd64/ftd2xx.lib",
+      "sha256": "7c3a73d3a2441b460f03358bc8cc81e5f3fb43523bfa35e4eef3bbe8bad5788d"
+    },
+    {
+      "file": "CDM/amd64/ftd2xx64.dll",
+      "sha256": "774af8b12c85d03562742acdf222af5e0432167bf107ba4b260757e4a5e36866"
+    },
+    {
+      "file": "CDM/amd64/ftdibus.sys",
+      "sha256": "3bd5bb7e646e67469ec25a37caa5131cf992759703b0fc170df7af265b9f8e74"
+    },
+    {
+      "file": "CDM/amd64/ftlang.dll",
+      "sha256": "c2729911c4b82d8f9e22e057a1570d0265d7a9eca44d6fe8dc0658f47263ce12"
+    },
+    {
+      "file": "CDM/amd64/ftser2k.sys",
+      "sha256": "7a303aa880cc746d13f71e565874fb7c174747372ccf358b928a72219d2a50dd"
+    },
+    {
+      "file": "CDM/amd64/ftserui2.dll",
+      "sha256": "55a23a2ac263e10b77d7e95601439f771062f2c248a8d93039a968d66100c39c"
+    },
+    {
+      "file": "CDM/ftd2xx.h",
+      "sha256": "ee0c6358ba2f13015ec7b07aea16bf3ada33508851cc494fc256a8b28af31147"
+    },
+    {
+      "file": "CDM/ftdibus.cat",
+      "sha256": "b286055896dea79d4521368293deee801930f3fb503cc3076ac97716b338b0f7"
+    },
+    {
+      "file": "CDM/ftdibus.inf",
+      "sha256": "ff361cdd7c814db0bea98578a731ef5c03bf457e06bca9950fdbab57a4d3c7f6"
+    },
+    {
+      "file": "CDM/ftdiport.cat",
+      "sha256": "113a35e6161f3ae8bb9d0e0f31913872c4b32fd6211ece27dddeb238f601eb59"
+    },
+    {
+      "file": "CDM/ftdiport.inf",
+      "sha256": "00627112cf622cc6fb99a6b5de24fcc61b6d0a211a6bd1e90b985bcf9950f6d9"
+    },
+    {
+      "file": "CDM/i386/ftbusui.dll",
+      "sha256": "ce0b628933becb2060a3b11a85c06146807ed03949f756036e6f93f597ec54c2"
+    },
+    {
+      "file": "CDM/i386/ftcserco.dll",
+      "sha256": "239161ab87c6be9d7996033777ffb62786a0f609d9f7270acf56ad7a03008070"
+    },
+    {
+      "file": "CDM/i386/ftd2xx.dll",
+      "sha256": "60bb0d6348b1eb0127401aa902f34c963d9196d2778c66f4008a6cf0c6f098a5"
+    },
+    {
+      "file": "CDM/i386/ftd2xx.lib",
+      "sha256": "3e9c6d57c4b3563e04b20be5adc419a0854d3a2abad93a39f49b973b52475314"
+    },
+    {
+      "file": "CDM/i386/ftdibus.sys",
+      "sha256": "65b3dde7820b256ecfa4ba3f8b757e3d4e30b139c005e8c00d1f831e5a378b5d"
+    },
+    {
+      "file": "CDM/i386/ftlang.dll",
+      "sha256": "8509256648e0797098f59978c2dc8ce5159152ed76301c88c0a72e2557e1a4c6"
+    },
+    {
+      "file": "CDM/i386/ftser2k.sys",
+      "sha256": "c43d9d3940b212db26471d240351e1ded48082a6ed3dd2b440688aadf672e74b"
+    },
+    {
+      "file": "CDM/i386/ftserui2.dll",
+      "sha256": "4b8d9b66f76599dd8e309e08a92a63470cff5afc5814261b2e1c3c2023e4284e"
+    },
+    {
+      "file": "CDM/Static/amd64/ftd2xx.lib",
+      "sha256": "1121a0456624bcdf768c70fe73ea649741c70160e85edb5007de950d4c646a57"
+    },
+    {
+      "file": "CDM/Static/i386/ftd2xx.lib",
+      "sha256": "d47e7ae0f5d17058677cdb84cf39f61ea2363020f9d01c14e91b9e71ea1598ca"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "afs_8ch", "afs_8ch.vcxproj", "{10D4A536-4901-41AD-B58F-7CB9798F27B2}"
+EndProject
+Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "afs_8ch_tests", "afs_8ch_tests.vcxproj", "{E2497119-CB4B-4526-A97A-5167EB66C909}"
+EndProject
+Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "afs_8ch_simulation_demo", "afs_8ch_simulation_demo.vcxproj", "{DA42E3B6-D58D-4338-811C-B700EA0A86E4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DA42E3B6-D58D-4338-811C-B700EA0A86E4}.Debug|x64.ActiveCfg = Debug|x64
+		{DA42E3B6-D58D-4338-811C-B700EA0A86E4}.Debug|x64.Build.0 = Debug|x64
+		{DA42E3B6-D58D-4338-811C-B700EA0A86E4}.Release|x64.ActiveCfg = Release|x64
+		{DA42E3B6-D58D-4338-811C-B700EA0A86E4}.Release|x64.Build.0 = Release|x64
+		{10D4A536-4901-41AD-B58F-7CB9798F27B2}.Debug|x64.ActiveCfg = Debug|x64
+		{10D4A536-4901-41AD-B58F-7CB9798F27B2}.Debug|x64.Build.0 = Debug|x64
+		{10D4A536-4901-41AD-B58F-7CB9798F27B2}.Release|x64.ActiveCfg = Release|x64
+		{10D4A536-4901-41AD-B58F-7CB9798F27B2}.Release|x64.Build.0 = Release|x64
+		{E2497119-CB4B-4526-A97A-5167EB66C909}.Debug|x64.ActiveCfg = Debug|x64
+		{E2497119-CB4B-4526-A97A-5167EB66C909}.Debug|x64.Build.0 = Debug|x64
+		{E2497119-CB4B-4526-A97A-5167EB66C909}.Release|x64.ActiveCfg = Release|x64
+		{E2497119-CB4B-4526-A97A-5167EB66C909}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+EndGlobal

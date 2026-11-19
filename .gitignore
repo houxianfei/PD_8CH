@@ -1,0 +1,17 @@
+.tools/
+sim/build/
+sim/work/
+sim/*.log
+par/db/
+par/incremental_db/
+par/output_files/
+par/*.log
+par/*.qws
+par/*.qdf
+par/AFS.srf
+par/AFS.done
+par/AFS.lpc.html
+transcript
+vsim.wlf
+modelsim.ini
+__pycache__/

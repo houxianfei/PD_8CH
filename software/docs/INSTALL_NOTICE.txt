@@ -1,0 +1,45 @@
+AFS 8CH v1.4.0
+
+Windows 10 / 11 x64. Hardware: FT232H USB 2.0 synchronous 245 FIFO.
+
+Without hardware, choose Mode > Simulation, select SIM-8CH and Connect.
+Simulation needs no installed USB system driver; select Skip on the USB
+driver page if using simulation only. Keep the bundled ftd2xx.dll.
+Get, acquisition, calibration, plots and CSV work through the same SDK.
+Generated data is labelled SIMULATION in the UI and data_source=simulation
+in CSV. See docs\simulation.md for steps, or run
+afs_8ch_simulation_demo.exe simulation_demo.csv for a console SDK demo.
+
+The USB 2.0 Driver page asks whether to install the signed FTDI D2XX/CDM
+2.12.36.4 package included in driver\CDM. Installation is recommended by
+default. Select Skip if a working D2XX driver is already installed.
+Driver installation requires administrator rights. This software does not change EEPROM settings or Windows test-signing.
+
+Use Search USB, select an FT232H serial number, then Connect.
+Use Get to update all eight ADC values. During acquisition, Get uses
+the most recent complete frame without interrupting the stream.
+
+Edit Name, P0 and P1 in Main UI. Power = P1 * (P0 + ADC).
+UI parameters are saved automatically in cfg\afs_8ch.ini for the next launch.
+Save calibration exports cfg\calibration.cfg; Save As... selects another file.
+Load calibration imports a saved file. Main UI displays the selected calibration file path; the default UI INI path stays hidden.
+Defaults are CH0-CH7, P0=0, P1=1. No physical energy unit is assumed.
+
+Tools > realtime_measure opens the acquisition window.
+Only selected channels are plotted, each in an independent plot.
+CSV exports only selected channels, with their names, ADC and Power.
+Rows use absolute UTC timestamps. The file header records acquisition/data
+start and end times, sample settings, channel selection and calibration.
+During active acquisition, the acquisition-end field stays blank while the
+exported data start/end fields identify the saved time range.
+
+Closing Main UI stops acquisition, releases USB and exits the application.
+Closing realtime_measure only hides the plot window.
+The renderer host stays hidden; there is no outer background window.
+
+See README.md and docs for build, protocol and driver details.
+Hardware integration and target-machine driver installation have not been tested.
+
+With Continue unchecked, set Duration (s). Finite collection stops automatically
+and keeps USB connected, including when a missing/corrupt final frame causes
+an incomplete-data warning. The two-second no-data fault applies to continuous mode.

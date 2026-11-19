@@ -1,0 +1,8 @@
+build/
+publish/
+.vs/
+*.user
+*.suo
+cfg/afs_8ch.ini
+cfg/calibration.cfg
+cfg/*.tmp

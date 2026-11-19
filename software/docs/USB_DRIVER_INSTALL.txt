@@ -1,0 +1,57 @@
+AFS 8CH v1.4.0 - USB 2.0 / FT232H 驱动安装
+
+运行环境：Windows 10 / 11 x64，FT232H 同步 245 FIFO。
+USB 2.0 为接口制式；驱动为 FTDI D2XX / CDM 2.12.36.4。
+
+一、安装
+
+方式 A：运行 AFS_8CH_Setup_v1.4.0.exe，在独立的“USB 2.0 Driver”页面选择
+“Install bundled FTDI D2XX driver (recommended)”（默认推荐）。
+安装包通过Windows pnputil安装driver\CDM中未修改的签名ftdibus.inf。
+已有可用D2XX驱动时选择“Skip; a working D2XX driver is already installed”。
+
+方式 B：连接板卡，在设备管理器中选择对应的 FT232H 设备，更新驱动程序，
+选择“浏览我的电脑以查找驱动程序”，指定本软件的 driver\CDM 目录并包含子文件夹。
+
+也可以由管理员 PowerShell 执行（将路径替换为实际安装目录）：
+pnputil /add-driver "C:\Program Files\RSIC\AFS 8CH\driver\CDM\ftdibus.inf" /install
+
+驱动操作可能需要管理员权限；如果 Windows 提示重启，请重启后重新连接设备。
+安装程序不会修改 EEPROM、Windows 测试签名模式或设备 VID/PID。
+
+二、连接
+
+启动 afs_8ch.exe，点击 Search USB，选择 FT232H 序列号并 Connect。
+仅显示 FT232H；FT232R、FT2232H、FT601 等不是本版支持的板卡。
+使用 D2XX 直连，不选择 COM 端口，不使用 D3XX、WinUSB 或 libusb 驱动。
+程序附带的 ftd2xx.dll 必须和 exe 放在一起，它不能替代内核驱动安装。
+
+如果搜索不到设备，请检查：
+1. 板卡供电、USB 数据线和设备管理器中的驱动状态。
+2. 是否被其他程序占用；关闭占用程序后重新搜索。
+3. 板卡是否为 FT232H，并已具备 245 FIFO 所需的硬件/EEPROM 配置。
+   本程序会设置运行时同步 FIFO bit mode 0x40，但不会重写 EEPROM。
+4. 是否已运行本 project_0 配套的 FPGA 固件。
+
+短命令写入失败可能破坏 FPGA 的 8 字节命令对齐；出现相关错误时请先复位 FPGA 再连接。
+真实拔线或USB读写错误会停止采集并释放句柄；连续模式保留两秒无有效样本保护。
+有限模式按采集秒数、帧数及时间戳自动结束，缺帧时提示数据不完整但保持USB连接。
+停止和重启之间会先排空残留数据，通常需几十毫秒。
+
+三、来源与版本
+
+FTDI 主站：https://ftdichip.com/drivers/d2xx-drivers/
+本次主站请求返回 HTTP 403，使用以下 FTDI China 页面链接的签名归档：
+https://ftdichip.cn/Drivers/D2XX.htm
+https://ftdichip.cn/Drivers/CDM/CDM%20v2.12.36.4%20WHQL%20Certified.zip
+
+归档 SHA256：a8654caa76151e92161e2767294337039189ac3bab3a794dbac791cd1901172b
+INF DriverVer：07/05/2021,2.12.36.4
+下载日期：2026-11-19
+x64 DLL 的 Authenticode 校验结果：Valid。
+签名者：Microsoft Windows Hardware Compatibility Publisher。
+
+详细文件校验值见 driver\SOURCE.json。
+原始归档在 driver\downloads；签名驱动文件在 driver\CDM。
+FTDI 驱动许可证及许可摘要保存在 driver\FTDriverLicenceTerms.htm 和
+driver\FTDriverLicenceTermsSummary.htm；FTDI 驱动仅用于 FTDI 芯片产品。

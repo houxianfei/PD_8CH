@@ -1,0 +1,108 @@
+{
+  "product": "AFS 8CH",
+  "version": "1.4.0",
+  "baseline": "E:\\AFS\\afs_gui1.0\\afs_gui",
+  "baseline_note": "Only ImGui/ImPlot dependencies and adapted Win32/DX11 host retained. No old SDK, vendor motor libraries or measurement files copied.",
+  "third_party": [
+    {
+      "file": "third_party/imgui/imconfig.h",
+      "sha256": "0884061cc43e27e1d346fe18dcd1425792eb2532d3d16610a82eb5ac751f7594",
+      "baseline_sha256": "0884061cc43e27e1d346fe18dcd1425792eb2532d3d16610a82eb5ac751f7594"
+    },
+    {
+      "file": "third_party/imgui/imgui.cpp",
+      "sha256": "d1fa35b865c866a6bb916ee150c62a269a6149025133734b9d2106dd53791494",
+      "baseline_sha256": "d1fa35b865c866a6bb916ee150c62a269a6149025133734b9d2106dd53791494"
+    },
+    {
+      "file": "third_party/imgui/imgui.h",
+      "sha256": "4e23b224bff77ed5bca275ebaff36e253696fcce06d9679c7d4a705f6a19ebc6",
+      "baseline_sha256": "4e23b224bff77ed5bca275ebaff36e253696fcce06d9679c7d4a705f6a19ebc6"
+    },
+    {
+      "file": "third_party/imgui/imgui_draw.cpp",
+      "sha256": "bdc2d8592410ba394a194e5ad5a61ce22b14d6ee2b881b619edb11650ec8595d",
+      "baseline_sha256": "bdc2d8592410ba394a194e5ad5a61ce22b14d6ee2b881b619edb11650ec8595d"
+    },
+    {
+      "file": "third_party/imgui/imgui_impl_dx11.cpp",
+      "sha256": "04df910197a38ef9d99d05330b56db3e40f745b849919d5f9eb7d4214dc236f5",
+      "baseline_sha256": "04df910197a38ef9d99d05330b56db3e40f745b849919d5f9eb7d4214dc236f5"
+    },
+    {
+      "file": "third_party/imgui/imgui_impl_dx11.h",
+      "sha256": "f203acc5bf47a08cec344f6a013bd904c255d525398954bf7d77d877151f717b",
+      "baseline_sha256": "f203acc5bf47a08cec344f6a013bd904c255d525398954bf7d77d877151f717b"
+    },
+    {
+      "file": "third_party/imgui/imgui_impl_win32.cpp",
+      "sha256": "6869261032f1d05f2d9ce5b064d41b4d1d25d7c64a1a3e97283cff2c6b1d7b88",
+      "baseline_sha256": "6869261032f1d05f2d9ce5b064d41b4d1d25d7c64a1a3e97283cff2c6b1d7b88"
+    },
+    {
+      "file": "third_party/imgui/imgui_impl_win32.h",
+      "sha256": "ff9b3bea7b9d3c4b3e11b0edc0efa0c11fc35a099fbe79794984637d813c5ffa",
+      "baseline_sha256": "ff9b3bea7b9d3c4b3e11b0edc0efa0c11fc35a099fbe79794984637d813c5ffa"
+    },
+    {
+      "file": "third_party/imgui/imgui_internal.h",
+      "sha256": "b2eb3e8e90e96d60f0d6e06ee0a201505f84bfc1aecdad21ef58bc2eb85f6bdc",
+      "baseline_sha256": "b2eb3e8e90e96d60f0d6e06ee0a201505f84bfc1aecdad21ef58bc2eb85f6bdc"
+    },
+    {
+      "file": "third_party/imgui/imgui_tables.cpp",
+      "sha256": "c46531a2efc83037cb2e2ea4200c468ab56723b0c49c1db135a12b4a5fed311e",
+      "baseline_sha256": "c46531a2efc83037cb2e2ea4200c468ab56723b0c49c1db135a12b4a5fed311e"
+    },
+    {
+      "file": "third_party/imgui/imgui_widgets.cpp",
+      "sha256": "9c7cba0ab112ea27de43afdb40605ebb365bf1f4834fbf563382a537914f00ea",
+      "baseline_sha256": "9c7cba0ab112ea27de43afdb40605ebb365bf1f4834fbf563382a537914f00ea"
+    },
+    {
+      "file": "third_party/imgui/imstb_rectpack.h",
+      "sha256": "2efa3d5f7d003c19743b15155dad9f46d9f9fc783a18893d703b431d3c990972",
+      "baseline_sha256": "2efa3d5f7d003c19743b15155dad9f46d9f9fc783a18893d703b431d3c990972"
+    },
+    {
+      "file": "third_party/imgui/imstb_textedit.h",
+      "sha256": "10777411bf758908aadaf7d73d4710d6ba0464f332f0015db9d1444c19456e6a",
+      "baseline_sha256": "10777411bf758908aadaf7d73d4710d6ba0464f332f0015db9d1444c19456e6a"
+    },
+    {
+      "file": "third_party/imgui/imstb_truetype.h",
+      "sha256": "88f0a25e27f5eefd6ec50c42fc5fe3026aa8170603efa08aa18d622db8660923",
+      "baseline_sha256": "88f0a25e27f5eefd6ec50c42fc5fe3026aa8170603efa08aa18d622db8660923"
+    },
+    {
+      "file": "third_party/imgui/LICENSE.txt",
+      "sha256": "c80c5789748d955c4a650562baa0d750494e2c7128c2ca66aaebe2e3c4e198bf",
+      "baseline_sha256": "c80c5789748d955c4a650562baa0d750494e2c7128c2ca66aaebe2e3c4e198bf"
+    },
+    {
+      "file": "third_party/implot/implot.cpp",
+      "sha256": "61987c1f6e6201d29aa16aaf00519915af1cac2d94cf4a6cc6b91e86020c76e3",
+      "baseline_sha256": "61987c1f6e6201d29aa16aaf00519915af1cac2d94cf4a6cc6b91e86020c76e3"
+    },
+    {
+      "file": "third_party/implot/implot.h",
+      "sha256": "5d3a9079b360aaaf0d94a17064d45f07f9ea6663d604890dbf225294802a9b3b",
+      "baseline_sha256": "5d3a9079b360aaaf0d94a17064d45f07f9ea6663d604890dbf225294802a9b3b"
+    },
+    {
+      "file": "third_party/implot/implot_internal.h",
+      "sha256": "15653fabe1e8326159aee335e3ffbd6375bf9e7c1961c75475bbc21cceb16423",
+      "baseline_sha256": "15653fabe1e8326159aee335e3ffbd6375bf9e7c1961c75475bbc21cceb16423"
+    },
+    {
+      "file": "third_party/implot/implot_items.cpp",
+      "sha256": "ccda1dd9da97bd8b103724adb609931be1dd7d725b7c6c79c48ebb962b736821",
+      "baseline_sha256": "ccda1dd9da97bd8b103724adb609931be1dd7d725b7c6c79c48ebb962b736821"
+    },
+    {
+      "file": "third_party/implot/LICENSE",
+      "sha256": "38bd30c2111fe7e3d8fb86d8607491239659eff1df1b1004b9a8349e20a91967",
+      "baseline_sha256": "38bd30c2111fe7e3d8fb86d8607491239659eff1df1b1004b9a8349e20a91967"
+    }
+  ]
+}
