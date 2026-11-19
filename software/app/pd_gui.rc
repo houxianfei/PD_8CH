@@ -2,8 +2,8 @@
 #pragma code_page(65001)
 
 1 VERSIONINFO
-FILEVERSION 1,4,0,0
-PRODUCTVERSION 1,4,0,0
+FILEVERSION 1,0,0,0
+PRODUCTVERSION 1,0,0,0
 FILEFLAGSMASK 0x3fL
 FILEFLAGS 0
 FILEOS VOS_NT_WINDOWS32
@@ -14,12 +14,12 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "CompanyName", "RSIC"
-            VALUE "FileDescription", "AFS 8CH USB acquisition"
-            VALUE "FileVersion", "1.4.0"
-            VALUE "InternalName", "afs_8ch"
-            VALUE "OriginalFilename", "afs_8ch.exe"
-            VALUE "ProductName", "AFS 8CH"
-            VALUE "ProductVersion", "1.4.0"
+            VALUE "FileDescription", "PD 8CH USB acquisition"
+            VALUE "FileVersion", "1.0.0"
+            VALUE "InternalName", "pd_8ch"
+            VALUE "OriginalFilename", "pd_8ch.exe"
+            VALUE "ProductName", "PD 8CH"
+            VALUE "ProductVersion", "1.0.0"
         END
     END
     BLOCK "VarFileInfo"

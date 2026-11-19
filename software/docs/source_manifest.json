@@ -1,6 +1,6 @@
 {
-  "product": "AFS 8CH",
-  "version": "1.4.0",
+  "product": "PD 8CH",
+  "version": "1.0.0",
   "baseline": "E:\\AFS\\afs_gui1.0\\afs_gui",
   "baseline_note": "Only ImGui/ImPlot dependencies and adapted Win32/DX11 host retained. No old SDK, vendor motor libraries or measurement files copied.",
   "third_party": [

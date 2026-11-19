@@ -7,7 +7,7 @@
 
 #pragma comment(lib, "winmm.lib")
 
-namespace AFS {
+namespace PD {
 // One absolute 60 Hz schedule. Wake-up jitter does not move every subsequent deadline.
 class FramePacer {
 public:

@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 
 // System-clock domain integration; FTDI transport remains a separate clock domain.
-module AFS_core (
+module PD_core (
     input                   clk,
     input                   rst_n,
     input [127:0]           adc_data,

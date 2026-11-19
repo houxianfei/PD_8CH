@@ -2,10 +2,10 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <ItemGroup>
     <ClCompile Include="tests\test_main.cpp" />
-    <ClCompile Include="src\driver\afs_driver.cpp" />
+    <ClCompile Include="src\driver\pd_driver.cpp" />
     <ClCompile Include="src\driver\internal\protocol.cpp" />
     <ClInclude Include="app\app_version.h" />
-    <ClInclude Include="include\afs\afs_driver.h" />
+    <ClInclude Include="include\pd\pd_driver.h" />
     <ClInclude Include="src\ui\ui.h" />
     <ClInclude Include="src\driver\internal\protocol.h" />
     <ClInclude Include="src\driver\internal\transport.h" />

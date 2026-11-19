@@ -1,7 +1,7 @@
 # Validate SDC endpoints against the synthesized netlist. This is not routed timing sign-off.
 package require ::quartus::project
 package require ::quartus::sta
-project_open AFS
+project_open PD
 create_timing_netlist -post_map
 read_sdc
 update_timing_netlist
@@ -15,7 +15,7 @@ if {$count != 128} {error "Expected 128 ADC capture registers, found $count"}
 foreach name {sys_clk ftdi_clk adc_sclk} {
     if {[get_collection_size [get_clocks $name]] != 1} {error "Missing clock $name"}
 }
-report_clocks -file output_files/AFS.clocks.rpt
-report_net_delay -nworst 100 -file output_files/AFS.cdc_nets.rpt
+report_clocks -file output_files/PD.clocks.rpt
+report_net_delay -nworst 100 -file output_files/PD.cdc_nets.rpt
 puts "PASS: clocks, Gray pointer constraints and 128 ADC capture endpoints resolved."
 project_close

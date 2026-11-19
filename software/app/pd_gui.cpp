@@ -26,12 +26,12 @@ static void (*g_render_window)(ImGuiViewport*, void*) = nullptr;
 static void (*g_present_window)(ImGuiViewport*, void*) = nullptr;
 
 static void RenderWindowTimed(ImGuiViewport* viewport, void* argument) {
-    AFS::performance::Scope timing(AFS::performance::Stage::RenderViewports);
+    PD::performance::Scope timing(PD::performance::Stage::RenderViewports);
     g_render_window(viewport, argument);
 }
 
 static void PresentWindowTimed(ImGuiViewport* viewport, void* argument) {
-    AFS::performance::Scope timing(AFS::performance::Stage::PresentViewports);
+    PD::performance::Scope timing(PD::performance::Stage::PresentViewports);
     g_present_window(viewport, argument);
 }
 
@@ -51,14 +51,14 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR arguments, int) {
     wc.lpfnWndProc = WndProc;
     wc.hInstance = instance;
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wc.lpszClassName = L"AFS8CHWindow";
+    wc.lpszClassName = L"PD8CHWindow";
     RegisterClassExW(&wc);
-    const auto hwnd = CreateWindowW(wc.lpszClassName, AFS_APP_TITLE_W, WS_OVERLAPPEDWINDOW,
+    const auto hwnd = CreateWindowW(wc.lpszClassName, PD_APP_TITLE_W, WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, static_cast<int>(1280 * scale), static_cast<int>(850 * scale),
         nullptr, nullptr, instance, nullptr);
     if (!hwnd || !CreateDeviceD3D(hwnd)) {
         CleanupDeviceD3D();
-        MessageBoxW(nullptr, L"Could not initialize Direct3D 11.", AFS_APP_TITLE_W, MB_ICONERROR);
+        MessageBoxW(nullptr, L"Could not initialize Direct3D 11.", PD_APP_TITLE_W, MB_ICONERROR);
         return 1;
     }
     // Keep the renderer host hidden. ImGui creates the two visible platform windows.
@@ -88,17 +88,17 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR arguments, int) {
     ImGui::GetPlatformIO().Renderer_RenderWindow = RenderWindowTimed;
     ImGui::GetPlatformIO().Renderer_SwapBuffers = PresentWindowTimed;
     {
-        AFS::ui application;
-        AFS::FramePacer pacer;
-        std::vector<AFS::performance::Frame> measurements;
+        PD::ui application;
+        PD::FramePacer pacer;
+        std::vector<PD::performance::Frame> measurements;
         measurements.reserve(profile ? 600 : 0);
         std::future<bool> report;
         unsigned frame_number = 0;
         bool done = false;
         while (!done) {
-            const auto frame_start = AFS::performance::Clock::now();
-            AFS::performance::Frame measurement;
-            AFS::performance::current_frame = profile && !report.valid() ? &measurement : nullptr;
+            const auto frame_start = PD::performance::Clock::now();
+            PD::performance::Frame measurement;
+            PD::performance::current_frame = profile && !report.valid() ? &measurement : nullptr;
             MSG msg;
             while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
                 TranslateMessage(&msg);
@@ -122,7 +122,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR arguments, int) {
                 CreateRenderTarget();
             }
             {
-                AFS::performance::Scope timing(AFS::performance::Stage::NewFrame);
+                PD::performance::Scope timing(PD::performance::Stage::NewFrame);
                 ImGui_ImplDX11_NewFrame();
                 ImGui_ImplWin32_NewFrame();
                 ImGui::NewFrame();
@@ -132,21 +132,21 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR arguments, int) {
                 done = true;
             }
             {
-                AFS::performance::Scope timing(AFS::performance::Stage::BuildDrawData);
+                PD::performance::Scope timing(PD::performance::Stage::BuildDrawData);
                 ImGui::Render();
             }
             // Both visible windows own platform swap chains. Do not render/present the hidden host.
             {
-                AFS::performance::Scope timing(AFS::performance::Stage::UpdateViewports);
+                PD::performance::Scope timing(PD::performance::Stage::UpdateViewports);
                 ImGui::UpdatePlatformWindows();
             }
             ImGui::RenderPlatformWindowsDefault();
             {
-                AFS::performance::Scope timing(AFS::performance::Stage::Wait);
+                PD::performance::Scope timing(PD::performance::Stage::Wait);
                 pacer.wait();
             }
-            measurement.frame_ms = std::chrono::duration<double, std::milli>(AFS::performance::Clock::now() - frame_start).count();
-            AFS::performance::current_frame = nullptr;
+            measurement.frame_ms = std::chrono::duration<double, std::milli>(PD::performance::Clock::now() - frame_start).count();
+            PD::performance::current_frame = nullptr;
             if (profile && !report.valid() && frame_number >= 60 && measurements.size() < 600) {
                 measurements.push_back(measurement);
                 if (measurements.size() == 600) {
@@ -154,13 +154,13 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR arguments, int) {
                     GetModuleFileNameW(nullptr, executable, static_cast<DWORD>(std::size(executable)));
                     const auto output = std::filesystem::path(executable).parent_path() / L"cfg/ui_performance.csv";
                     report = std::async(std::launch::async, [output, data = std::move(measurements)] {
-                        return AFS::performance::write_report(output, data);
+                        return PD::performance::write_report(output, data);
                     });
                 }
             }
             ++frame_number;
         }
-        AFS::performance::current_frame = nullptr;
+        PD::performance::current_frame = nullptr;
     }
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();

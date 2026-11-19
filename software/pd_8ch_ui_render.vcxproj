@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{DA42E3B6-D58D-4338-811C-B700EA0A86E4}</ProjectGuid>
+    <ProjectGuid>{1AB00A19-687D-4F23-8134-E4C90448D2E5}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -25,9 +25,9 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup>
-    <OutDir>$(ProjectDir)build\v1.4.0\$(Configuration)\</OutDir>
-    <IntDir>$(ProjectDir)build\obj\afs_8ch_simulation_demo\$(Configuration)\</IntDir>
-    <TargetName>afs_8ch_simulation_demo</TargetName>
+    <OutDir>$(ProjectDir)build\PD_8CH_v1.0.0\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)build\obj\pd_8ch_ui_render\$(Configuration)\</IntDir>
+    <TargetName>pd_8ch_ui_render</TargetName>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup>
@@ -48,25 +48,42 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>ftd2xx.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;windowscodecs.lib;comdlg32.lib;shell32.lib;ole32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)vendor\ftdi;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="examples\simulation_demo.cpp" />
-    <ClCompile Include="src\driver\afs_driver.cpp" />
+    <ClCompile Include="src\ui\ui.cpp" />
+    <ClCompile Include="src\driver\pd_driver.cpp" />
     <ClCompile Include="src\driver\internal\protocol.cpp" />
     <ClCompile Include="src\driver\internal\simulation_transport.cpp" />
+    <ClCompile Include="third_party\imgui\imgui.cpp" />
+    <ClCompile Include="third_party\imgui\imgui_draw.cpp" />
+    <ClCompile Include="third_party\imgui\imgui_tables.cpp" />
+    <ClCompile Include="third_party\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="third_party\imgui\imgui_impl_win32.cpp" />
+    <ClCompile Include="third_party\imgui\imgui_impl_dx11.cpp" />
+    <ClCompile Include="third_party\implot\implot.cpp" />
+    <ClCompile Include="third_party\implot\implot_items.cpp" />
     <ClInclude Include="app\app_version.h" />
-    <ClInclude Include="include\afs\afs_driver.h" />
+    <ClInclude Include="include\pd\pd_driver.h" />
+    <ClInclude Include="src\ui\ui.h" />
     <ClInclude Include="src\driver\internal\protocol.h" />
     <ClInclude Include="src\driver\internal\transport.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ItemGroup>
-    <ClCompile Include="src\driver\internal\usb2_transport.cpp" />
+    <ClCompile Include="tests\ui_render.cpp" />
   </ItemGroup>
-  <Target Name="CopyD2XXRuntime" AfterTargets="Build">
-    <Copy SourceFiles="$(ProjectDir)driver\CDM\amd64\ftd2xx64.dll" DestinationFiles="$(OutDir)ftd2xx.dll" />
-  </Target>
+  <ItemGroup>
+    <ClCompile Include="src\ui\settings.cpp" />
+    <ClInclude Include="src\ui\settings.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\ui\performance.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\ui\frame_pacer.h" />
+    <ClInclude Include="src\ui\performance_report.h" />
+  </ItemGroup>
 </Project>

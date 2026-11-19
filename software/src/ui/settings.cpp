@@ -8,7 +8,7 @@
 #include <sstream>
 #include <stdexcept>
 
-namespace AFS {
+namespace PD {
 namespace {
 bool safe_text(const std::string& value) {
     for (const unsigned char character : value) {
@@ -78,7 +78,7 @@ std::string serialize_ui_settings(const UiSettings& settings) {
     std::ostringstream output;
     output.imbue(std::locale::classic());
     output << std::setprecision(std::numeric_limits<double>::max_digits10);
-    output << "[AFS][UI]\nVersion=1\nRateHz=" << settings.rate_hz << "\nDurationSeconds=" << settings.duration_seconds;
+    output << "[PD][UI]\nVersion=1\nRateHz=" << settings.rate_hz << "\nDurationSeconds=" << settings.duration_seconds;
     output << "\nContinuous=" << settings.continuous << "\nShowMeasure=" << settings.show_measure;
     output << "\nSimulation=" << settings.simulation;
     output << "\nSerial=" << std::quoted(settings.serial);
@@ -111,7 +111,7 @@ bool load_ui_settings(const std::filesystem::path& path, UiSettings& settings, s
         while (std::getline(input, line)) {
             line = trim(line);
             if (!line.empty() && line.front() == '[') {
-                section = line == "[AFS][UI]";
+                section = line == "[PD][UI]";
                 found = found || section;
                 continue;
             }
@@ -168,7 +168,7 @@ bool load_ui_settings(const std::filesystem::path& path, UiSettings& settings, s
         error.clear();
         return true;
     } catch (const std::exception&) {
-        error = "Could not load UI INI. Defaults are retained; the original file has not been overwritten.";
+        error = "Could not load PD UI INI. A valid [PD][UI] section is required; current settings and the original file are retained.";
         return false;
     }
 }
@@ -189,7 +189,7 @@ bool save_ui_settings(const std::filesystem::path& path, const UiSettings& setti
         error.clear();
         return true;
     } catch (const std::exception&) {
-        error = "Could not save cfg/afs_8ch.ini. Check that the cfg folder is writable.";
+        error = "Could not save cfg/pd_8ch.ini. Check that the cfg folder is writable.";
         return false;
     }
 }

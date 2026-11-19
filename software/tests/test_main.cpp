@@ -1,4 +1,4 @@
-#include "afs/afs_driver.h"
+#include "pd/pd_driver.h"
 #include "driver/internal/protocol.h"
 #include "driver/internal/transport.h"
 #include "ui/settings.h"
@@ -20,11 +20,11 @@
 
 #define CHECK(expression) do { if (!(expression)) { throw std::runtime_error(std::string(__FILE__) + ":" + std::to_string(__LINE__) + ": " #expression); } } while (false)
 
-using namespace AFS;
-using namespace AFS::internal;
+using namespace PD;
+using namespace PD::internal;
 using namespace std::chrono_literals;
 
-namespace AFS::internal {
+namespace PD::internal {
 std::unique_ptr<Transport> make_usb2_transport() {
     throw std::runtime_error("Tests must explicitly inject their transport; real USB is forbidden.");
 }
@@ -167,6 +167,8 @@ public:
     std::atomic<unsigned> live_reads{0};
     std::atomic<unsigned> frame_period_ms{1};
     std::atomic<unsigned> adc_reads{0};
+    std::atomic<std::uint32_t> firmware_version{0x00010000};
+    std::atomic<unsigned> version_reads{0};
     std::atomic<int> fail_channel{-1};
     std::atomic<int> drop_frame{-1};
     std::atomic<int> corrupt_frame{-1};
@@ -215,9 +217,13 @@ public:
                 ++live_reads;
             }
             CHECK(!running);
-            CHECK(bytes[2] == 0xF1 || bytes[2] < 8);
+            CHECK(bytes[2] == 0xF1 || bytes[2] == 0xF4 || bytes[2] < 8);
             const std::array<std::int16_t, 8> registers{-32768, -1, 0, 32767, 123, -456, 777, -888};
             std::uint32_t reply = 0;
+            if (bytes[2] == 0xF4) {
+                reply = firmware_version;
+                ++version_reads;
+            }
             if (bytes[2] < 8) {
                 reply = static_cast<std::uint16_t>(registers[bytes[2]]);
                 ++adc_reads;
@@ -284,7 +290,7 @@ public:
     }
 };
 
-static Snapshot wait_for(af_driver& driver, const std::function<bool(const Snapshot&)>& predicate, int timeout_ms = 4000) {
+static Snapshot wait_for(pd_driver& driver, const std::function<bool(const Snapshot&)>& predicate, int timeout_ms = 4000) {
     const auto deadline = std::chrono::steady_clock::now() + std::chrono::milliseconds(timeout_ms);
     Snapshot snapshot;
     do {
@@ -297,13 +303,50 @@ static Snapshot wait_for(af_driver& driver, const std::function<bool(const Snaps
     throw std::runtime_error("Timed out: " + snapshot.status + " / " + snapshot.error);
 }
 
-static Snapshot idle(af_driver& driver) {
+static Snapshot idle(pd_driver& driver) {
     return wait_for(driver, [](const Snapshot& snapshot) { return !snapshot.busy; });
+}
+
+static void firmware_version_tests() {
+    CHECK(format_firmware_version(0x00010000) == "1.0.0");
+    CHECK(format_firmware_version(0x00010203) == "1.2.3");
+    CHECK(format_firmware_version(0) == "Unknown");
+    CHECK(format_firmware_version(0xFFFFFFFF) == "Unknown");
+    auto transport = std::make_unique<FakeTransport>();
+    auto* fixture = transport.get();
+    pd_driver driver(std::move(transport));
+    fixture->firmware_version = 0x00010203;
+    driver.open("TEST232H");
+    auto snapshot = idle(driver);
+    CHECK(snapshot.connected && snapshot.has_firmware_version && snapshot.firmware_version == 0x00010203);
+    CHECK(fixture->version_reads == 1);
+    driver.DataCollection_start({100, 100, false});
+    snapshot = wait_for(driver, [](const Snapshot& s) { return !s.busy && s.state == State::Connected && s.received == 10; });
+    CHECK(snapshot.firmware_version == 0x00010203 && fixture->version_reads == 1 && fixture->live_reads == 0);
+    driver.close();
+    snapshot = idle(driver);
+    CHECK(!snapshot.connected && !snapshot.has_firmware_version && snapshot.firmware_version == 0);
+    fixture->firmware_version = 0;
+    driver.open("TEST232H");
+    snapshot = idle(driver);
+    CHECK(snapshot.connected && !snapshot.has_firmware_version && snapshot.error.empty());
+    driver.close();
+    idle(driver);
+    fixture->fail_channel = 0xF4;
+    driver.open("TEST232H");
+    snapshot = idle(driver);
+    CHECK(snapshot.state == State::Fault && !snapshot.connected && !snapshot.has_firmware_version);
+    fixture->fail_channel = -1;
+    fixture->firmware_version = 0x00010000;
+    driver.open("TEST232H");
+    snapshot = idle(driver);
+    CHECK(snapshot.connected && snapshot.has_firmware_version && snapshot.firmware_version == 0x00010000);
+    std::cout << "PASS firmware version: connect-time read, decode, cached acquisition display, unknown, disconnect, failure and reconnect\n";
 }
 
 static void simulation_tests(const std::filesystem::path& directory) {
     // make_usb2_transport above throws: this tests the public SDK without touching USB.
-    af_driver driver(DriverMode::Simulation);
+    pd_driver driver(DriverMode::Simulation);
     CHECK(driver.DataCollection_read().driver_mode == DriverMode::Simulation);
     driver.search_devices();
     auto snapshot = idle(driver);
@@ -311,7 +354,9 @@ static void simulation_tests(const std::filesystem::path& directory) {
     driver.open("INVALID");
     CHECK(!idle(driver).connected);
     driver.open("SIM-8CH");
-    CHECK(idle(driver).connected);
+    snapshot = idle(driver);
+    CHECK(snapshot.connected && snapshot.has_firmware_version);
+    CHECK(format_firmware_version(snapshot.firmware_version) == "1.0.0");
     driver.get_device_data();
     CHECK(idle(driver).has_channel_values);
     for (const unsigned rate : {1000u, 100u, 10u, 1u}) {
@@ -338,7 +383,7 @@ static void simulation_tests(const std::filesystem::path& directory) {
     options.calibration.names[1] = "SDK Demo A";
     options.calibration.p0[1] = 2;
     options.calibration.p1[1] = 3;
-    options.software_version = AFS_APP_VERSION;
+    options.software_version = PD_APP_VERSION;
     std::string error;
     const auto csv = directory / "simulation.csv";
     CHECK(save_realtime_csv(csv, snapshot, options, error));
@@ -379,7 +424,7 @@ static void simulation_tests(const std::filesystem::path& directory) {
 static void lifecycle_tests() {
     auto fake = std::make_unique<FakeTransport>();
     auto* fixture = fake.get();
-    af_driver driver(std::move(fake));
+    pd_driver driver(std::move(fake));
     driver.search_devices();
     CHECK(idle(driver).devices.size() == 1);
     driver.open("TEST232H");
@@ -525,7 +570,7 @@ static void calibration_tests() {
     CHECK(!valid_calibration(invalid));
 
     const auto path = std::filesystem::temp_directory_path() /
-        (L"AFS8CH_calibration_" + std::to_wstring(std::chrono::steady_clock::now().time_since_epoch().count()) + L".txt");
+        (L"PD8CH_calibration_" + std::to_wstring(std::chrono::steady_clock::now().time_since_epoch().count()) + L".txt");
     std::string error;
     CHECK(save_calibration(path, calibration, error));
     Calibration loaded;
@@ -536,23 +581,26 @@ static void calibration_tests() {
     CHECK(load_calibration(path, loaded, error));
     CHECK(loaded.p1 == Calibration{}.p1);
     CHECK(loaded.names == Calibration{}.names);
-    {
+    const auto retained_calibration = loaded;
+    for (const auto* header : {"AFS8CH_CALIBRATION_V1", "AFS8CH_CALIBRATION_V2", "PD8CH_CALIBRATION_V1"}) {
         std::ofstream legacy(path);
-        legacy << "AFS8CH_CALIBRATION_V1\n";
+        legacy << header << "\n";
         for (unsigned i = 0; i < CHANNEL_COUNT; ++i) {
-            legacy << i << " 0 1\n";
+            legacy << i << " 100 200 \"Legacy probe\"\n";
         }
+        legacy.close();
+        CHECK(!load_calibration(path, loaded, error));
+        CHECK(error.find("PD8CH_CALIBRATION_V2") != std::string::npos);
+        CHECK(loaded.p0 == retained_calibration.p0 && loaded.p1 == retained_calibration.p1 && loaded.names == retained_calibration.names);
     }
-    CHECK(load_calibration(path, loaded, error));
-    CHECK(loaded.names == Calibration{}.names);
     {
         std::ofstream broken(path);
-        broken << "AFS8CH_CALIBRATION_V1\n0 1 2\n";
+        broken << "PD8CH_CALIBRATION_V2\n0 1 2\n";
     }
     CHECK(!load_calibration(path, loaded, error));
-    CHECK(loaded.p1 == Calibration{}.p1);
+    CHECK(loaded.p0 == retained_calibration.p0 && loaded.p1 == retained_calibration.p1);
     CHECK(!save_calibration(path, invalid, error));
-    af_data sample;
+    pd_data sample;
     sample.channels = adc;
     CHECK(save_csv(path, {sample}, calibration, error));
     std::ifstream csv(path);
@@ -577,8 +625,8 @@ static void calibration_tests() {
 
 static void settings_tests() {
     const auto directory = std::filesystem::temp_directory_path() /
-        (L"AFS8CH_ini_" + std::to_wstring(std::chrono::steady_clock::now().time_since_epoch().count()));
-    const auto path = directory / L"cfg/afs_8ch.ini";
+        (L"PD8CH_ini_" + std::to_wstring(std::chrono::steady_clock::now().time_since_epoch().count()));
+    const auto path = directory / L"cfg/pd_8ch.ini";
     UiSettings settings;
     settings.simulation = true;
     settings.rate_hz = 10;
@@ -604,7 +652,7 @@ static void settings_tests() {
     input.close();
     {
         std::ofstream invalid(path);
-        invalid << "[AFS][UI]\nRateHz=3\nDurationSeconds=nan\n";
+        invalid << "[PD][UI]\nRateHz=3\nDurationSeconds=nan\n";
     }
     CHECK(!load_ui_settings(path, loaded, error));
     CHECK(serialize_ui_settings(loaded) == serialize_ui_settings(settings));
@@ -617,11 +665,19 @@ static void settings_tests() {
     CHECK(loaded.calibration.p1 == Calibration{}.p1);
     {
         std::ofstream legacy(path);
-        legacy << "[AFS][UI]\nVersion=1\nRateHz=100\n";
+        legacy << "[PD][UI]\nVersion=1\nRateHz=100\n";
     }
     UiSettings legacy_settings;
     CHECK(load_ui_settings(path, legacy_settings, error));
     CHECK(!legacy_settings.simulation && legacy_settings.rate_hz == 100);
+    {
+        std::ofstream old_ini(path);
+        old_ini << "[AFS][UI]\nVersion=1\nRateHz=10\n";
+    }
+    const auto previous = serialize_ui_settings(legacy_settings);
+    CHECK(!load_ui_settings(path, legacy_settings, error));
+    CHECK(serialize_ui_settings(legacy_settings) == previous);
+    CHECK(error.find("[PD][UI]") != std::string::npos);
     std::filesystem::remove(path);
     std::filesystem::remove(directory / L"cfg");
     std::filesystem::remove(directory);
@@ -631,7 +687,7 @@ static void settings_tests() {
 static void finite_completion_tests() {
     auto transport = std::make_unique<FakeTransport>();
     auto* fixture = transport.get();
-    af_driver driver(std::move(transport));
+    pd_driver driver(std::move(transport));
     driver.open("TEST232H");
     CHECK(idle(driver).connected);
     fixture->drop_frame = 3;
@@ -688,7 +744,7 @@ static void realtime_csv_tests(const std::filesystem::path& directory) {
     data.timestamp_gaps = 8;
     data.error = "Example only, no hardware";
     for (unsigned i = 0; i < 3; ++i) {
-        af_data sample;
+        pd_data sample;
         sample.timestamp_ms = i == 2 ? 10 : i;
         sample.channels[0] = 111;
         sample.channels[1] = static_cast<std::int16_t>(10 + i * 10);
@@ -700,7 +756,7 @@ static void realtime_csv_tests(const std::filesystem::path& directory) {
     options.selected.fill(false);
     options.selected[1] = true;
     options.selected[3] = true;
-    options.software_version = AFS_APP_VERSION;
+    options.software_version = PD_APP_VERSION;
     options.calibration_file = "cfg/custom, calibration.cfg";
     options.calibration.names[1] = "Probe \"A\", east";
     options.calibration.names[3] = "Probe B";
@@ -759,7 +815,7 @@ static void shutdown_tests() {
     {
         auto transport = std::make_unique<FakeTransport>();
         transport->shutdown_stops = stops;
-        af_driver driver(std::move(transport));
+        pd_driver driver(std::move(transport));
         driver.open("TEST232H");
         CHECK(idle(driver).connected);
         driver.DataCollection_start({1000, 1000, true});
@@ -778,7 +834,7 @@ static void cache_csv_tests() {
     CHECK(frame_count({1, 100, false}) == 1);
     SampleBuffer full_cache;
     for (std::size_t n = 0; n < CACHE_CAPACITY + 5; ++n) {
-        af_data entry;
+        pd_data entry;
         entry.timestamp_ms = static_cast<double>(n);
         full_cache.append(entry);
     }
@@ -790,7 +846,7 @@ static void cache_csv_tests() {
     CHECK(full_cache.snapshot().size() == CACHE_CAPACITY);
     CHECK(full_cache.overwritten == 5);
     SampleBuffer buffer(3);
-    af_data sample;
+    pd_data sample;
     sample.channels = {-32768, -1, 0, 32767, 4, 5, 6, 7};
     for (int i = 0; i < 5; ++i) {
         sample.timestamp_ms = i * 0.5;
@@ -803,7 +859,7 @@ static void cache_csv_tests() {
     CHECK(retained.front().timestamp_ms == 1);
     std::string error;
     const auto output = std::filesystem::temp_directory_path() /
-        (L"AFS8CH_测试_" + std::to_wstring(std::chrono::steady_clock::now().time_since_epoch().count()) + L".csv");
+        (L"PD8CH_测试_" + std::to_wstring(std::chrono::steady_clock::now().time_since_epoch().count()) + L".csv");
     CHECK(save_csv(output, retained, error));
     std::ifstream file(output, std::ios::binary);
     const std::string actual((std::istreambuf_iterator<char>(file)), {});
@@ -827,9 +883,10 @@ int main(int argc, char** argv) {
         cache_csv_tests();
         calibration_tests();
         const auto csv_directory = argc == 3 ? std::filesystem::path(argv[2]) :
-            std::filesystem::temp_directory_path() / (L"AFS8CH_CSV_" + std::to_wstring(std::chrono::steady_clock::now().time_since_epoch().count()));
+            std::filesystem::temp_directory_path() / (L"PD8CH_CSV_" + std::to_wstring(std::chrono::steady_clock::now().time_since_epoch().count()));
         realtime_csv_tests(csv_directory);
         simulation_tests(csv_directory);
+        firmware_version_tests();
         settings_tests();
         lifecycle_tests();
         finite_completion_tests();

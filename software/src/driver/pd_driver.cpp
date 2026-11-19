@@ -1,4 +1,4 @@
-#include "afs/afs_driver.h"
+#include "pd/pd_driver.h"
 #include "driver/internal/protocol.h"
 #include "driver/internal/transport.h"
 #include <algorithm>
@@ -18,12 +18,20 @@
 #include <ctime>
 #include <cstdio>
 
-namespace AFS {
+namespace PD {
 using Clock = std::chrono::steady_clock;
 using namespace std::chrono_literals;
 
 static std::int64_t unix_time_us() {
     return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+}
+
+std::string format_firmware_version(std::uint32_t version) {
+    if (!version || (version >> 24) != 0) {
+        return "Unknown";
+    }
+    return std::to_string((version >> 16) & 0xFF) + "." +
+        std::to_string((version >> 8) & 0xFF) + "." + std::to_string(version & 0xFF);
 }
 
 std::string format_utc_timestamp(std::int64_t unix_microseconds) {
@@ -89,7 +97,7 @@ bool save_realtime_csv(const std::filesystem::path& path, const Snapshot& snapsh
         std::ofstream file(path, std::ios::binary | std::ios::trunc);
         file.exceptions(std::ios::badbit | std::ios::failbit);
         file.imbue(std::locale::classic());
-        file << "\xEF\xBB\xBF# format,AFS8CH_REALTIME_CSV_V2\r\n";
+        file << "\xEF\xBB\xBF# format,PD8CH_REALTIME_CSV_V2\r\n";
         file << "# software_version," << csv_field(options.software_version) << "\r\n";
         file << "# data_source," << (snapshot.acquisition_mode == DriverMode::Simulation ? "simulation" : "hardware") << "\r\n";
         file << "# timestamp_timezone,UTC\r\n";
@@ -192,7 +200,7 @@ bool load_calibration(const std::filesystem::path& path, Calibration& calibratio
         file.imbue(std::locale::classic());
         std::string magic;
         Calibration candidate;
-        if (!(file >> magic) || (magic != "AFS8CH_CALIBRATION_V1" && magic != "AFS8CH_CALIBRATION_V2")) {
+        if (!(file >> magic) || magic != "PD8CH_CALIBRATION_V2") {
             throw std::runtime_error("Invalid calibration file header.");
         }
         for (unsigned i = 0; i < CHANNEL_COUNT; ++i) {
@@ -200,7 +208,7 @@ bool load_calibration(const std::filesystem::path& path, Calibration& calibratio
             if (!(file >> channel >> candidate.p0[i] >> candidate.p1[i]) || channel != i) {
                 throw std::runtime_error("Invalid calibration channel entry.");
             }
-            if (magic == "AFS8CH_CALIBRATION_V2" && !(file >> std::quoted(candidate.names[i]))) {
+            if (!(file >> std::quoted(candidate.names[i]))) {
                 throw std::runtime_error("Invalid channel name entry.");
             }
         }
@@ -212,7 +220,7 @@ bool load_calibration(const std::filesystem::path& path, Calibration& calibratio
         error.clear();
         return true;
     } catch (const std::exception&) {
-        error = "Could not load calibration. Previous settings are retained.";
+        error = "Could not load calibration. A valid PD8CH_CALIBRATION_V2 file is required; previous settings are retained.";
         return false;
     }
 }
@@ -226,7 +234,7 @@ bool save_calibration(const std::filesystem::path& path, const Calibration& cali
         std::ofstream file(temporary, std::ios::binary | std::ios::trunc);
         file.exceptions(std::ios::badbit | std::ios::failbit);
         file.imbue(std::locale::classic());
-        file << "AFS8CH_CALIBRATION_V2\n" << std::setprecision(std::numeric_limits<double>::max_digits10);
+        file << "PD8CH_CALIBRATION_V2\n" << std::setprecision(std::numeric_limits<double>::max_digits10);
         for (unsigned i = 0; i < CHANNEL_COUNT; ++i) {
             file << i << ' ' << calibration.p0[i] << ' ' << calibration.p1[i] << ' ' << std::quoted(calibration.names[i]) << '\n';
         }
@@ -275,7 +283,7 @@ const char* state_name(State state) {
     return "Unknown";
 }
 
-bool save_csv(const std::filesystem::path& path, const std::vector<af_data>& samples, std::string& error) {
+bool save_csv(const std::filesystem::path& path, const std::vector<pd_data>& samples, std::string& error) {
     try {
         std::ofstream file(path, std::ios::binary | std::ios::trunc);
         file.exceptions(std::ios::badbit | std::ios::failbit);
@@ -298,7 +306,7 @@ bool save_csv(const std::filesystem::path& path, const std::vector<af_data>& sam
     }
 }
 
-bool save_csv(const std::filesystem::path& path, const std::vector<af_data>& samples,
+bool save_csv(const std::filesystem::path& path, const std::vector<pd_data>& samples,
     const Calibration& calibration, std::string& error) {
     try {
         if (!valid_calibration(calibration)) {
@@ -332,7 +340,7 @@ bool save_csv(const std::filesystem::path& path, const std::vector<af_data>& sam
     }
 }
 
-struct af_driver::Impl {
+struct pd_driver::Impl {
     enum class Operation {
         SetMode,
         Search,
@@ -407,6 +415,8 @@ struct af_driver::Impl {
         std::lock_guard<std::mutex> lock(mutex);
         state.state = State::Fault;
         state.connected = false;
+        state.has_firmware_version = false;
+        state.firmware_version = 0;
         state.status = "USB connection closed after an error.";
         state.error = error;
         if (state.acquisition_start_unix_us > 0 && state.acquisition_end_unix_us == 0) {
@@ -573,23 +583,32 @@ struct af_driver::Impl {
                 (devices.empty() ? "No FT232H found. Check the D2XX driver and USB cable." : "Select an FT232H and connect.");
             break;
         }
-        case Operation::Open:
+        case Operation::Open: {
             if (transport->is_open()) {
                 throw std::invalid_argument("Disconnect before opening another device.");
             }
             status(State::Starting, state.driver_mode == DriverMode::Simulation ? "Opening SIM-8CH..." : "Opening USB 2.0 / FT232H...");
             transport->open(request.serial);
             prepare_idle();
+            const auto version = read_register(0xF4);
             {
                 std::lock_guard<std::mutex> lock(mutex);
                 state.serial = request.serial;
                 state.error.clear();
+                state.firmware_version = version;
+                state.has_firmware_version = version != 0 && (version >> 24) == 0;
             }
             status(State::Connected, state.driver_mode == DriverMode::Simulation ? "Simulation connected. Generated demonstration data only." : "USB 2.0 / FT232H connected.");
             break;
+        }
         case Operation::Close:
             stop();
             transport->close();
+            {
+                std::lock_guard<std::mutex> lock(mutex);
+                state.has_firmware_version = false;
+                state.firmware_version = 0;
+            }
             status(State::Disconnected, "USB disconnected. Buffered samples retained.");
             break;
         case Operation::Start: {
@@ -752,10 +771,10 @@ struct af_driver::Impl {
     }
 };
 
-af_driver::af_driver() : af_driver(DriverMode::Usb) {
+pd_driver::pd_driver() : pd_driver(DriverMode::Usb) {
 }
 
-af_driver::af_driver(DriverMode mode) {
+pd_driver::pd_driver(DriverMode mode) {
     if (mode != DriverMode::Usb && mode != DriverMode::Simulation) {
         throw std::invalid_argument("Invalid connection mode.");
     }
@@ -763,48 +782,48 @@ af_driver::af_driver(DriverMode mode) {
     impl_ = std::make_unique<Impl>(std::move(transport), mode);
 }
 
-af_driver::af_driver(std::unique_ptr<internal::Transport> transport) : impl_(std::make_unique<Impl>(std::move(transport))) {
+pd_driver::pd_driver(std::unique_ptr<internal::Transport> transport) : impl_(std::make_unique<Impl>(std::move(transport))) {
 }
 
-af_driver::~af_driver() = default;
+pd_driver::~pd_driver() = default;
 
-void af_driver::search_devices() {
+void pd_driver::search_devices() {
     impl_->submit({Impl::Operation::Search});
 }
 
-void af_driver::set_connection_mode(DriverMode mode) {
+void pd_driver::set_connection_mode(DriverMode mode) {
     impl_->submit({Impl::Operation::SetMode, {}, {}, mode});
 }
 
-void af_driver::open(const std::string& serial) {
+void pd_driver::open(const std::string& serial) {
     impl_->submit({Impl::Operation::Open, serial});
 }
 
-void af_driver::close() {
+void pd_driver::close() {
     impl_->submit({Impl::Operation::Close});
 }
 
-void af_driver::get_device_data() {
+void pd_driver::get_device_data() {
     impl_->submit({Impl::Operation::Get});
 }
 
-void af_driver::DataCollection_start(const CollectionSettings& settings) {
+void pd_driver::DataCollection_start(const CollectionSettings& settings) {
     impl_->submit({Impl::Operation::Start, {}, settings});
 }
 
-void af_driver::DataCollection_stop() {
+void pd_driver::DataCollection_stop() {
     impl_->submit({Impl::Operation::Stop});
 }
 
-void af_driver::clear_data_buf() {
+void pd_driver::clear_data_buf() {
     impl_->submit({Impl::Operation::Clear});
 }
 
-Snapshot af_driver::DataCollection_read() const {
+Snapshot pd_driver::DataCollection_read() const {
     return DataCollection_read_for_ui(CACHE_CAPACITY);
 }
 
-Snapshot af_driver::DataCollection_read_for_ui(std::size_t maximum_plot_samples) const {
+Snapshot pd_driver::DataCollection_read_for_ui(std::size_t maximum_plot_samples) const {
     std::lock_guard<std::mutex> lock(impl_->mutex);
     Snapshot snapshot = impl_->state;
     snapshot.samples = impl_->buffer.snapshot(maximum_plot_samples);

@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace AFS::internal {
+namespace PD::internal {
 static std::uint64_t load64(const std::uint8_t* bytes) {
     std::uint64_t result = 0;
     for (unsigned i = 0; i < 8; ++i) {
@@ -41,11 +41,11 @@ StreamParser::StreamParser(std::uint32_t interval_ticks, std::uint8_t mask)
     }
 }
 
-std::vector<af_data> StreamParser::feed(const std::uint8_t* bytes, std::size_t count) {
+std::vector<pd_data> StreamParser::feed(const std::uint8_t* bytes, std::size_t count) {
     if (count) {
         bytes_.insert(bytes_.end(), bytes, bytes + count);
     }
-    std::vector<af_data> result;
+    std::vector<pd_data> result;
     std::size_t offset = 0;
     const std::size_t length = 8 * (1 + ((mask_ & 1) != 0) + ((mask_ & 2) != 0));
     while (bytes_.size() - offset >= 8) {
@@ -85,7 +85,7 @@ std::vector<af_data> StreamParser::feed(const std::uint8_t* bytes, std::size_t c
         }
         last_timestamp_ = timestamp;
         have_timestamp_ = true;
-        af_data sample;
+        pd_data sample;
         sample.timestamp_ms = static_cast<double>(elapsed_ticks_) * (static_cast<double>(interval_) + 1) / 50000.0;
         std::size_t pos = 8;
         for (unsigned group = 0; group < 2; ++group) {
@@ -117,7 +117,7 @@ SampleBuffer::SampleBuffer(std::size_t capacity) : capacity_(capacity) {
     }
 }
 
-void SampleBuffer::append(const af_data& sample) {
+void SampleBuffer::append(const pd_data& sample) {
     ++revision;
     if (samples_.size() == capacity_) {
         samples_.pop_front();
@@ -134,11 +134,11 @@ void SampleBuffer::clear() {
     overwritten = 0;
 }
 
-std::vector<af_data> SampleBuffer::snapshot() const {
+std::vector<pd_data> SampleBuffer::snapshot() const {
     return {samples_.begin(), samples_.end()};
 }
 
-std::vector<af_data> SampleBuffer::snapshot(std::size_t maximum_samples) const {
+std::vector<pd_data> SampleBuffer::snapshot(std::size_t maximum_samples) const {
     const auto count = std::min(maximum_samples, samples_.size());
     return {samples_.end() - static_cast<std::ptrdiff_t>(count), samples_.end()};
 }

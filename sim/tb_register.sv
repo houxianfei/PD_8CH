@@ -53,6 +53,11 @@ task rd(input [31:0] address,input [31:0] expected);
 endtask
 initial begin
     repeat(4) @(negedge S_AXI_ACLK); S_AXI_ARESETN=1;
+    rd(32'h400003D0,32'h00010000);
+    aw(32'h400003D0);
+    wd(32'hFFFFFFFF,4'hF);
+    response();
+    rd(32'h400003D0,32'h00010000);
     // Independent AW/W ordering and byte enables.
     aw(32'h400003C0); repeat(4) @(negedge S_AXI_ACLK);
     wd(32'hAABBCCDD,4'b0101); response(); rd(32'h400003C0,32'h00BB03DD);
@@ -67,6 +72,9 @@ initial begin
     @(negedge S_AXI_ACLK); S_AXI_ARESETN=0;
     #1;
     if(S_AXI_RVALID || S_AXI_BVALID || sample_control!=0) $fatal(1,"AXI asynchronous reset");
+    @(negedge S_AXI_ACLK);
+    S_AXI_ARESETN=1;
+    rd(32'h400003D0,32'h00010000);
     $display("PASS tb_register: separate AXI channels, byte strobes, stalled responses, invalid addresses, reset");
     $finish;
 end

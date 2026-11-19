@@ -7,7 +7,7 @@
 #include <deque>
 #include <stdexcept>
 
-namespace AFS::internal {
+namespace PD::internal {
 namespace {
 using Clock = std::chrono::steady_clock;
 
@@ -63,6 +63,8 @@ public:
                 value = interval_;
             } else if (address == 0xF2) {
                 value = limit_;
+            } else if (address == 0xF4) {
+                value = SIMULATION_FIRMWARE_VERSION;
             } else if (address == 0xF1 || address == 0xF3) {
                 value = 0;
             } else {

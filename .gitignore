@@ -8,10 +8,15 @@ par/output_files/
 par/*.log
 par/*.qws
 par/*.qdf
-par/AFS.srf
-par/AFS.done
-par/AFS.lpc.html
+par/PD.srf
+par/PD.done
+par/PD.lpc.html
 transcript
 vsim.wlf
 modelsim.ini
 __pycache__/
+
+# Legacy Quartus local artifacts.
+par/AFS.srf
+par/AFS.done
+par/AFS.lpc.html

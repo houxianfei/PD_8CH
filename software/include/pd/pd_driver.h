@@ -7,15 +7,17 @@
 #include <string>
 #include <vector>
 
-namespace AFS {
+namespace PD {
 namespace internal {
 class Transport;
 }
 
 constexpr std::size_t CHANNEL_COUNT = 8;
 constexpr std::size_t CACHE_CAPACITY = 65536;
+constexpr std::uint32_t SIMULATION_FIRMWARE_VERSION = 0x00010000;
+std::string format_firmware_version(std::uint32_t version);
 
-struct af_data {
+struct pd_data {
     double timestamp_ms = 0;
     std::array<std::int16_t, CHANNEL_COUNT> channels{};
 };
@@ -65,14 +67,16 @@ struct Snapshot {
     bool busy = false;
     bool connected = false;
     bool has_sample = false;
+    bool has_firmware_version = false;
+    std::uint32_t firmware_version = 0;
     bool has_channel_values = false;
     std::array<std::int16_t, CHANNEL_COUNT> channel_values{};
     std::string serial;
     std::string status = "Search for an FT232H USB 2.0 device.";
     std::string error;
     std::vector<DeviceInfo> devices;
-    af_data latest;
-    std::vector<af_data> samples;
+    pd_data latest;
+    std::vector<pd_data> samples;
     std::size_t cached_samples = 0;
     std::uint64_t sample_revision = 0;
     std::uint64_t received = 0;
@@ -102,14 +106,14 @@ bool save_realtime_csv(const std::filesystem::path& path, const Snapshot& snapsh
     const CsvExportOptions& options, std::string& error);
 
 // All USB operations are serialized on a private worker. Requests return immediately.
-class af_driver {
+class pd_driver {
 public:
-    af_driver();
-    explicit af_driver(DriverMode mode);
-    explicit af_driver(std::unique_ptr<internal::Transport> transport);
-    ~af_driver();
-    af_driver(const af_driver&) = delete;
-    af_driver& operator=(const af_driver&) = delete;
+    pd_driver();
+    explicit pd_driver(DriverMode mode);
+    explicit pd_driver(std::unique_ptr<internal::Transport> transport);
+    ~pd_driver();
+    pd_driver(const pd_driver&) = delete;
+    pd_driver& operator=(const pd_driver&) = delete;
 
     void search_devices();
     // Asynchronous; disconnect first. Switching mode clears the previous cache.
@@ -130,8 +134,8 @@ private:
 
 std::uint32_t interval_for_rate(unsigned rate_hz);
 std::uint32_t frame_count(const CollectionSettings& settings);
-bool save_csv(const std::filesystem::path& path, const std::vector<af_data>& samples, std::string& error);
-bool save_csv(const std::filesystem::path& path, const std::vector<af_data>& samples,
+bool save_csv(const std::filesystem::path& path, const std::vector<pd_data>& samples, std::string& error);
+bool save_csv(const std::filesystem::path& path, const std::vector<pd_data>& samples,
     const Calibration& calibration, std::string& error);
 const char* state_name(State state);
 }

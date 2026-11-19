@@ -1,8 +1,8 @@
 #pragma once
 
-#include "afs/afs_driver.h"
+#include "pd/pd_driver.h"
 
-namespace AFS {
+namespace PD {
 struct UiSettings {
     bool simulation = false;
     unsigned rate_hz = 1000;

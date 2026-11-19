@@ -1,6 +1,6 @@
 # 固件架构、寄存器与 USB 协议
 
-适用于当前 `rtl/`，顶层 `AFS`，器件 `EP4CE6E22C8`。操作步骤见[首次使用指南](getting_started.md)，完整引脚表见[硬件接口](hardware.md)。
+适用于当前 `rtl/`，顶层 `PD`，器件 `EP4CE6E22C8`。操作步骤见[首次使用指南](getting_started.md)，完整引脚表见[硬件接口](hardware.md)。
 
 ## 数据路径与采集
 
@@ -29,6 +29,9 @@ USB 的 8bit 寄存器编号在内部映射到 AXI 地址 `0x40000000 + 编号×
 | 0xF1 | 上传控制 | 读写 | 0 |
 | 0xF2 | 有限模式的上传帧数 | 读写 | 0 |
 | 0xF3 | 上传完成标志，bit0 有效 | 只读 | 0 |
+| 0xF4 | PD固件版本，{保留字节,主版本,次版本,修订号} | 只读 | 0x00010000（1.0.0） |
+
+F4每个版本段8位，写入忽略。软件连接时读取并缓存，采集中不重复读；Main UI分别显示固件/软件版本。维护版本和命令字节示例见[命名与版本说明](pd_rename.md)。
 
 `0xF0` 回读原写入值，实际间隔使用 `max(写入值,1000)`。沿用参考计数规则，一个间隔为该值加一拍；默认约 20.02µs。第一帧在启动后立即生成，后续按间隔抽取；FIFO 空间不足时等待之后的采样时刻。
 
@@ -86,8 +89,8 @@ AA CMD ADDR DATA0 DATA1 DATA2 DATA3 CRC
 
 | 文件 | 职责 |
 |---|---|
-| `rtl/AFS.v` | 顶层端口、50/60MHz域和FT232H内核连接 |
-| `rtl/AFS_core.v` | 采集、寄存器、命令解析和帧仲裁 |
+| `rtl/PD.v` | 顶层端口、50/60MHz域和FT232H内核连接 |
+| `rtl/PD_core.v` | 采集、寄存器、命令解析和帧仲裁 |
 | `rtl/Sensor_Collection.v`、`rtl/spi_master.v` | 八路ADC同步转换、初始化和SPI时序 |
 | `rtl/control_register.v` | ADC/上传控制寄存器 |
 | `rtl/USB_axi4lite.v`、`rtl/usb_command_assembler.v` | 八字节命令拼接、CRC和寄存器访问 |

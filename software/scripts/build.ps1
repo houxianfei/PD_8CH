@@ -18,18 +18,18 @@ if ($Configuration -eq 'All') {
 foreach ($config in $configurations) {
     $logDirectory = Join-Path $softwareRoot 'build\logs'
     New-Item -ItemType Directory -Force -Path $logDirectory | Out-Null
-    & $msbuild (Join-Path $softwareRoot 'afs_8ch.sln') /m /nologo /verbosity:minimal "/p:Configuration=$config" /p:Platform=x64 "/flp:logfile=$logDirectory\build_$config.log;verbosity=normal"
+    & $msbuild (Join-Path $softwareRoot 'pd_8ch.sln') /m /nologo /verbosity:minimal "/p:Configuration=$config" /p:Platform=x64 "/flp:logfile=$logDirectory\build_$config.log;verbosity=normal"
     if ($LASTEXITCODE -ne 0) {
         throw "Build failed: $config"
     }
     if ($Test) {
         $vectors = Join-Path (Split-Path $softwareRoot -Parent) 'sim\reference_vectors.vh'
-        & (Join-Path $softwareRoot "build\v1.4.0\$config\afs_8ch_tests.exe") $vectors (Join-Path $logDirectory "csv_$config") |
+        & (Join-Path $softwareRoot "build\PD_8CH_v1.0.0\$config\pd_8ch_tests.exe") $vectors (Join-Path $logDirectory "csv_$config") |
             Tee-Object -FilePath (Join-Path $logDirectory "test_$config.log")
         if ($LASTEXITCODE -ne 0) {
             throw "Tests failed: $config"
         }
-        & (Join-Path $softwareRoot "build\v1.4.0\$config\afs_8ch_simulation_demo.exe") (Join-Path $logDirectory "sdk_demo_$config.csv") |
+        & (Join-Path $softwareRoot "build\PD_8CH_v1.0.0\$config\pd_8ch_simulation_demo.exe") (Join-Path $logDirectory "sdk_demo_$config.csv") |
             Tee-Object -FilePath (Join-Path $logDirectory "sdk_demo_$config.log")
         if ($LASTEXITCODE -ne 0) {
             throw "SDK simulation demonstration failed: $config"

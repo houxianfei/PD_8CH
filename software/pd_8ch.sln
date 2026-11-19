@@ -2,11 +2,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "afs_8ch", "afs_8ch.vcxproj", "{10D4A536-4901-41AD-B58F-7CB9798F27B2}"
+Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "pd_8ch", "pd_8ch.vcxproj", "{10D4A536-4901-41AD-B58F-7CB9798F27B2}"
 EndProject
-Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "afs_8ch_tests", "afs_8ch_tests.vcxproj", "{E2497119-CB4B-4526-A97A-5167EB66C909}"
+Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "pd_8ch_tests", "pd_8ch_tests.vcxproj", "{E2497119-CB4B-4526-A97A-5167EB66C909}"
 EndProject
-Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "afs_8ch_simulation_demo", "afs_8ch_simulation_demo.vcxproj", "{DA42E3B6-D58D-4338-811C-B700EA0A86E4}"
+Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "pd_8ch_simulation_demo", "pd_8ch_simulation_demo.vcxproj", "{DA42E3B6-D58D-4338-811C-B700EA0A86E4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

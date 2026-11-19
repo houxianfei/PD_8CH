@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module AFS (
+module PD (
     input                   usb_clk_60m,
     input                   clk50M,
     input                   Rst_n,
@@ -49,7 +49,7 @@ wire rx_tready;
 wire tx_tvalid;
 wire tx_tready;
 wire tx_tlast;
-AFS_core i_core (
+PD_core i_core (
     .clk(clk50M),
     .rst_n(rst_n),
     .adc_data(adc_data),

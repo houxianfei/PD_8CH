@@ -9,7 +9,7 @@
 #include <numeric>
 #include <vector>
 
-namespace AFS::performance {
+namespace PD::performance {
 inline bool write_report(const std::filesystem::path& path, const std::vector<Frame>& frames) {
     if (frames.empty()) {
         return false;

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "afs/afs_driver.h"
+#include "pd/pd_driver.h"
 #include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <vector>
 
-namespace AFS::internal {
+namespace PD::internal {
 // Byte transports share the command protocol and stream parser.
 class Transport {
 public:

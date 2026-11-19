@@ -1,12 +1,12 @@
 #pragma once
 
-#include "afs/afs_driver.h"
+#include "pd/pd_driver.h"
 #include "ui/settings.h"
 #include <array>
 #include <future>
 #include <string>
 
-namespace AFS {
+namespace PD {
 class ui {
 public:
     explicit ui(bool persist_settings = true, const std::filesystem::path& config_directory = {});
@@ -19,7 +19,7 @@ public:
     UiSettings settings() const;
 
 private:
-    af_driver driver_;
+    pd_driver driver_;
     bool open_ = true;
     bool simulation_ = false;
     Calibration calibration_;
@@ -44,14 +44,14 @@ private:
     std::future<std::string> saving_;
     std::string save_status_;
     std::uint64_t plotted_received_ = 0;
-    af_data plotted_latest_;
+    pd_data plotted_latest_;
     std::vector<double> plot_times_;
     std::array<std::vector<double>, CHANNEL_COUNT> plot_values_;
     std::array<double, CHANNEL_COUNT> plot_minimum_{};
     std::array<double, CHANNEL_COUNT> plot_maximum_{};
     std::uint64_t cached_revision_ = 0;
     std::uint64_t cached_received_ = 0;
-    af_data cached_latest_;
+    pd_data cached_latest_;
 
     void connection(const Snapshot& snapshot);
     void signal_table(const Snapshot& snapshot);

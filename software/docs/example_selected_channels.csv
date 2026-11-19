@@ -1,5 +1,5 @@
-﻿# format,AFS8CH_REALTIME_CSV_V2
-# software_version,"1.4.0"
+﻿# format,PD8CH_REALTIME_CSV_V2
+# software_version,"1.0.0"
 # data_source,hardware
 # timestamp_timezone,UTC
 # timestamp_source,host_start_command_plus_fpga_relative_timestamp
@@ -7,7 +7,7 @@
 # acquisition_end_utc,2026-11-19T00:00:00.143456Z
 # data_start_utc,2026-11-19T00:00:00.123456Z
 # data_end_utc,2026-11-19T00:00:00.133456Z
-# exported_at_utc,2026-11-19T10:52:55.236175Z
+# exported_at_utc,2026-11-19T12:12:01.125307Z
 # snapshot_at_utc,2026-11-19T00:00:00.148456Z
 # acquisition_state,"Connected"
 # acquisition_status,"Finite acquisition ended."

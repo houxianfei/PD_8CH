@@ -12,7 +12,7 @@ wire spics;
 wire spiclk;
 wire spido;
 reg [7:0] lanes=0;
-AFS dut (
+PD dut (
     .clk50M(clk50M),
     .usb_clk_60m(usb_clk_60m),
     .Rst_n(Rst_n),
@@ -97,6 +97,9 @@ initial begin
     wait(dut.adc_valid);
     bytes(REF_READ_CH7,0,8);
     expect_word(40,64'h0000777700007777);
+    // Fixed command and reply for PD firmware version 1.0.0.
+    bytes(64'hB200000000F402AA,0,8);
+    expect_word(48,64'h0001000000010000);
     $display("PASS tb_ft232h: real 8bit FIFO, 50/60MHz CDC, split USB command, replies, sample bytes, reset");
     $finish;
 end

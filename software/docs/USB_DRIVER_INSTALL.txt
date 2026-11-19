@@ -1,11 +1,11 @@
-AFS 8CH v1.4.0 - USB 2.0 / FT232H 驱动安装
+PD 8CH v1.0.0 - USB 2.0 / FT232H 驱动安装
 
 运行环境：Windows 10 / 11 x64，FT232H 同步 245 FIFO。
 USB 2.0 为接口制式；驱动为 FTDI D2XX / CDM 2.12.36.4。
 
 一、安装
 
-方式 A：运行 AFS_8CH_Setup_v1.4.0.exe，在独立的“USB 2.0 Driver”页面选择
+方式 A：运行 PD_8CH_Setup_v1.0.0.exe，在独立的“USB 2.0 Driver”页面选择
 “Install bundled FTDI D2XX driver (recommended)”（默认推荐）。
 安装包通过Windows pnputil安装driver\CDM中未修改的签名ftdibus.inf。
 已有可用D2XX驱动时选择“Skip; a working D2XX driver is already installed”。
@@ -14,14 +14,14 @@ USB 2.0 为接口制式；驱动为 FTDI D2XX / CDM 2.12.36.4。
 选择“浏览我的电脑以查找驱动程序”，指定本软件的 driver\CDM 目录并包含子文件夹。
 
 也可以由管理员 PowerShell 执行（将路径替换为实际安装目录）：
-pnputil /add-driver "C:\Program Files\RSIC\AFS 8CH\driver\CDM\ftdibus.inf" /install
+pnputil /add-driver "C:\Program Files\RSIC\PD 8CH\driver\CDM\ftdibus.inf" /install
 
 驱动操作可能需要管理员权限；如果 Windows 提示重启，请重启后重新连接设备。
 安装程序不会修改 EEPROM、Windows 测试签名模式或设备 VID/PID。
 
 二、连接
 
-启动 afs_8ch.exe，点击 Search USB，选择 FT232H 序列号并 Connect。
+启动 pd_8ch.exe，点击 Search USB，选择 FT232H 序列号并 Connect。
 仅显示 FT232H；FT232R、FT2232H、FT601 等不是本版支持的板卡。
 使用 D2XX 直连，不选择 COM 端口，不使用 D3XX、WinUSB 或 libusb 驱动。
 程序附带的 ftd2xx.dll 必须和 exe 放在一起，它不能替代内核驱动安装。

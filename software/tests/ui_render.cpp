@@ -23,7 +23,7 @@
 
 using Microsoft::WRL::ComPtr;
 
-namespace AFS::internal {
+namespace PD::internal {
 class NoHardware final : public Transport {
 public:
     std::vector<DeviceInfo> search() override {
@@ -125,35 +125,37 @@ static void render(const std::filesystem::path& path, unsigned width, unsigned h
         const auto config = std::filesystem::absolute(path.parent_path() / ("cfg_" + path.stem().string()));
         const bool simulation_demo = path.stem() == "simulation_demo";
         if (simulation_demo) {
-            AFS::UiSettings settings;
+            PD::UiSettings settings;
             settings.simulation = true;
             settings.rate_hz = 100;
             settings.serial = "SIM-8CH";
             std::string error;
-            if (!AFS::save_ui_settings(config / "afs_8ch.ini", settings, "", error)) {
+            if (!PD::save_ui_settings(config / "pd_8ch.ini", settings, "", error)) {
                 throw std::runtime_error(error);
             }
         }
-        AFS::ui application(true, config);
-        application.set_calibration(AFS::Calibration{});
-        std::array<bool, AFS::CHANNEL_COUNT> selection{};
+        PD::ui application(true, config);
+        application.set_calibration(PD::Calibration{});
+        std::array<bool, PD::CHANNEL_COUNT> selection{};
         int expected_plots = 0;
-        for (unsigned channel = 0; channel < AFS::CHANNEL_COUNT; ++channel) {
+        for (unsigned channel = 0; channel < PD::CHANNEL_COUNT; ++channel) {
             selection[channel] = (channel_mask & (1 << channel)) != 0;
             expected_plots += selection[channel];
         }
         application.set_visible_channels(selection);
-        AFS::Snapshot snapshot;
+        PD::Snapshot snapshot;
         snapshot.status = "No FT232H found. Check the D2XX driver and USB cable.";
         if (samples) {
-            snapshot.state = AFS::State::Connected;
+            snapshot.state = PD::State::Connected;
             snapshot.connected = true;
+            snapshot.has_firmware_version = true;
+            snapshot.firmware_version = 0x00010000;
             snapshot.has_sample = true;
             snapshot.serial = "QA_ONLY";
             snapshot.devices = {{"QA_ONLY", "Internal renderer fixture", false}};
             snapshot.status = "Connected. Internal renderer fixture.";
             for (unsigned n = 0; n < (benchmark_frames ? 65536u : 500u); ++n) {
-                AFS::af_data sample;
+                PD::pd_data sample;
                 sample.timestamp_ms = n;
                 for (unsigned ch = 0; ch < 8; ++ch) {
                     sample.channels[ch] = static_cast<std::int16_t>(15000 * std::sin(n * 0.03 + ch * 0.3));
@@ -166,7 +168,7 @@ static void render(const std::filesystem::path& path, unsigned width, unsigned h
             snapshot.received = snapshot.samples.size();
         }
         if (simulation_demo) {
-            AFS::af_driver sdk(AFS::DriverMode::Simulation);
+            PD::pd_driver sdk(PD::DriverMode::Simulation);
             sdk.open("SIM-8CH");
             sdk.DataCollection_start({100, 1000, false});
             const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(4);
@@ -182,26 +184,26 @@ static void render(const std::filesystem::path& path, unsigned width, unsigned h
             }
             snapshot.devices = {{"SIM-8CH", "Simulated eight-channel ADC", false}};
         }
-        AFS::internal::SampleBuffer cache;
+        PD::internal::SampleBuffer cache;
         if (benchmark_frames) {
             for (const auto& sample : snapshot.samples) {
                 cache.append(sample);
             }
         }
-        std::vector<AFS::performance::Frame> timings;
-        AFS::Snapshot metadata = snapshot;
+        std::vector<PD::performance::Frame> timings;
+        PD::Snapshot metadata = snapshot;
         metadata.samples.clear();
         metadata.cached_samples = cache.size();
-        std::unique_ptr<AFS::FramePacer> pacer;
+        std::unique_ptr<PD::FramePacer> pacer;
         if (paced) {
-            pacer = std::make_unique<AFS::FramePacer>();
+            pacer = std::make_unique<PD::FramePacer>();
         }
         for (unsigned frame = 0; frame < (benchmark_frames ? benchmark_frames : 5u); ++frame) {
-            AFS::performance::Frame timing;
-            AFS::performance::current_frame = benchmark_frames ? &timing : nullptr;
-            const auto frame_start = AFS::performance::Clock::now();
+            PD::performance::Frame timing;
+            PD::performance::current_frame = benchmark_frames ? &timing : nullptr;
+            const auto frame_start = PD::performance::Clock::now();
             if (customized && frame == 2) {
-                AFS::Calibration calibration;
+                PD::Calibration calibration;
                 calibration.names[1] = "Probe A";
                 calibration.names[3] = "Probe B";
                 calibration.p0[1] = 1.25;
@@ -213,7 +215,7 @@ static void render(const std::filesystem::path& path, unsigned width, unsigned h
                 }
             }
             if (close_main && frame == 3) {
-                const auto* window = ImGui::FindWindowByName("Main UI / " AFS_APP_TITLE "###MainUI");
+                const auto* window = ImGui::FindWindowByName("Main UI / " PD_APP_TITLE "###MainUI");
                 if (!window || !window->HasCloseButton) {
                     throw std::runtime_error("Main UI has no close button");
                 }
@@ -235,9 +237,9 @@ static void render(const std::filesystem::path& path, unsigned width, unsigned h
             ImGui_ImplDX11_NewFrame();
             ImGui::NewFrame();
             if (benchmark_frames) {
-                AFS::Snapshot view;
+                PD::Snapshot view;
                 {
-                    AFS::performance::Scope scope(AFS::performance::Stage::Snapshot);
+                    PD::performance::Scope scope(PD::performance::Stage::Snapshot);
                     view = metadata;
                     view.samples = cache.snapshot(1500);
                     view.sample_revision = benchmark_live ? frame + 1 : 1;
@@ -247,7 +249,7 @@ static void render(const std::filesystem::path& path, unsigned width, unsigned h
                 application.draw(snapshot);
             }
             {
-                AFS::performance::Scope scope(AFS::performance::Stage::BuildDrawData);
+                PD::performance::Scope scope(PD::performance::Stage::BuildDrawData);
                 ImGui::Render();
             }
             ID3D11RenderTargetView* view = target.Get();
@@ -255,15 +257,15 @@ static void render(const std::filesystem::path& path, unsigned width, unsigned h
             const float color[] = {0.08f, 0.09f, 0.11f, 1};
             context->ClearRenderTargetView(view, color);
             {
-                AFS::performance::Scope scope(AFS::performance::Stage::RenderHost);
+                PD::performance::Scope scope(PD::performance::Stage::RenderHost);
                 ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
             }
             if (pacer) {
-                AFS::performance::Scope scope(AFS::performance::Stage::Wait);
+                PD::performance::Scope scope(PD::performance::Stage::Wait);
                 pacer->wait();
             }
-            timing.frame_ms = std::chrono::duration<double, std::milli>(AFS::performance::Clock::now() - frame_start).count();
-            AFS::performance::current_frame = nullptr;
+            timing.frame_ms = std::chrono::duration<double, std::milli>(PD::performance::Clock::now() - frame_start).count();
+            PD::performance::current_frame = nullptr;
             if (benchmark_frames && frame >= 60) {
                 timings.push_back(timing);
             }
@@ -288,7 +290,7 @@ static void render(const std::filesystem::path& path, unsigned width, unsigned h
         if (benchmark_frames) {
             auto report = path;
             report.replace_extension(".csv");
-            if (!AFS::performance::write_report(report, timings)) {
+            if (!PD::performance::write_report(report, timings)) {
                 throw std::runtime_error("Could not write benchmark report");
             }
         } else {
@@ -302,34 +304,66 @@ static void render(const std::filesystem::path& path, unsigned width, unsigned h
 }
 
 static void pacing_benchmark(const std::filesystem::path& directory) {
-    using Clock = AFS::performance::Clock;
-    std::vector<AFS::performance::Frame> legacy;
+    using Clock = PD::performance::Clock;
+    std::vector<PD::performance::Frame> legacy;
     for (unsigned i = 0; i < 90; ++i) {
         const auto start = Clock::now();
         std::this_thread::sleep_until(start + std::chrono::duration_cast<Clock::duration>(std::chrono::duration<double>(1.0 / 60.0)));
-        AFS::performance::Frame frame;
+        PD::performance::Frame frame;
         frame.frame_ms = std::chrono::duration<double, std::milli>(Clock::now() - start).count();
         legacy.push_back(frame);
     }
-    AFS::performance::write_report(directory / "pacing_legacy.csv", legacy);
-    std::vector<AFS::performance::Frame> precise;
-    AFS::FramePacer pacer;
+    PD::performance::write_report(directory / "pacing_legacy.csv", legacy);
+    std::vector<PD::performance::Frame> precise;
+    PD::FramePacer pacer;
     for (unsigned i = 0; i < 90; ++i) {
         const auto start = Clock::now();
         pacer.wait();
-        AFS::performance::Frame frame;
+        PD::performance::Frame frame;
         frame.frame_ms = std::chrono::duration<double, std::milli>(Clock::now() - start).count();
         precise.push_back(frame);
     }
-    AFS::performance::write_report(directory / "pacing_high_resolution.csv", precise);
+    PD::performance::write_report(directory / "pacing_high_resolution.csv", precise);
     std::cout << "High-resolution timer available: " << pacer.high_resolution() << '\n';
 }
 
 static void restart_settings_test() {
     const auto directory = std::filesystem::temp_directory_path() /
-        (L"AFS8CH_ui_restart_" + std::to_wstring(std::chrono::steady_clock::now().time_since_epoch().count()));
-    const auto ini = directory / L"afs_8ch.ini";
-    AFS::UiSettings expected;
+        (L"PD8CH_ui_restart_" + std::to_wstring(std::chrono::steady_clock::now().time_since_epoch().count()));
+    const auto ini = directory / L"pd_8ch.ini";
+    const auto old_ini = directory / L"afs_8ch.ini";
+    std::filesystem::create_directories(directory);
+    const std::string old_content = "[AFS][UI]\nVersion=1\nRateHz=10\nSimulation=1\n";
+    {
+        std::ofstream old(old_ini);
+        old << old_content;
+        std::ofstream old_calibration(directory / L"calibration.cfg");
+        old_calibration << "AFS8CH_CALIBRATION_V2\n";
+        for (unsigned channel = 0; channel < PD::CHANNEL_COUNT; ++channel) {
+            old_calibration << channel << " 100 200 \"Old probe\"\n";
+        }
+    }
+    ImGui::CreateContext();
+    ImGui::GetIO().IniFilename = nullptr;
+    {
+        PD::ui fresh(true, directory);
+        const auto current = fresh.settings();
+        if (current.rate_hz != 1000 || current.simulation || current.calibration.p0 != PD::Calibration{}.p0 ||
+            current.calibration.p1 != PD::Calibration{}.p1 || current.calibration.names != PD::Calibration{}.names) {
+            throw std::runtime_error("PD must not import legacy AFS settings or calibration");
+        }
+    }
+    ImGui::DestroyContext();
+    {
+        std::ifstream old(old_ini);
+        const std::string retained((std::istreambuf_iterator<char>(old)), {});
+        if (retained != old_content) {
+            throw std::runtime_error("Legacy AFS INI was modified");
+        }
+    }
+    std::filesystem::remove(old_ini);
+    std::filesystem::remove(directory / L"calibration.cfg");
+    PD::UiSettings expected;
     expected.simulation = true;
     expected.rate_hz = 100;
     expected.duration_seconds = 4.25;
@@ -343,15 +377,15 @@ static void restart_settings_test() {
     expected.calibration.p0[3] = 2.5;
     expected.calibration.p1[3] = -0.25;
     std::string error;
-    if (!AFS::save_ui_settings(ini, expected, "[Window][###MainUI]\nPos=120,150\nSize=550,760\nCollapsed=0\n", error)) {
+    if (!PD::save_ui_settings(ini, expected, "[Window][###MainUI]\nPos=120,150\nSize=550,760\nCollapsed=0\n", error)) {
         throw std::runtime_error(error);
     }
     for (int launch = 0; launch < 2; ++launch) {
         ImGui::CreateContext();
         ImGui::GetIO().IniFilename = nullptr;
         {
-            AFS::ui application(true, directory);
-            if (AFS::serialize_ui_settings(application.settings()) != AFS::serialize_ui_settings(expected)) {
+            PD::ui application(true, directory);
+            if (PD::serialize_ui_settings(application.settings()) != PD::serialize_ui_settings(expected)) {
                 throw std::runtime_error("UI did not restore every persisted parameter on restart");
             }
             const auto* window = ImGui::FindWindowSettingsByID(ImHashStr("###MainUI"));
@@ -363,27 +397,27 @@ static void restart_settings_test() {
     }
     {
         std::ofstream invalid(ini);
-        invalid << "[AFS][UI]\nRateHz=3\n";
+        invalid << "[PD][UI]\nRateHz=3\n";
     }
     ImGui::CreateContext();
     ImGui::GetIO().IniFilename = nullptr;
     {
-        AFS::ui application(true, directory);
+        PD::ui application(true, directory);
         if (application.settings().rate_hz != 1000) {
             throw std::runtime_error("Invalid INI did not restore defaults");
         }
     }
     ImGui::DestroyContext();
-    AFS::UiSettings recovered;
-    if (!AFS::load_ui_settings(ini, recovered, error)) {
+    PD::UiSettings recovered;
+    if (!PD::load_ui_settings(ini, recovered, error)) {
         throw std::runtime_error("Invalid INI was not rebuilt automatically after backup");
     }
     bool found_backup = false;
     for (const auto& file : std::filesystem::directory_iterator(directory)) {
-        if (file.path().filename().wstring().find(L"afs_8ch.ini.invalid.") == 0) {
+        if (file.path().filename().wstring().find(L"pd_8ch.ini.invalid.") == 0) {
             std::ifstream backup(file.path());
             const std::string contents((std::istreambuf_iterator<char>(backup)), {});
-            if (contents != "[AFS][UI]\nRateHz=3\n") {
+            if (contents != "[PD][UI]\nRateHz=3\n") {
                 throw std::runtime_error("Invalid INI backup was not preserved");
             }
             backup.close();
@@ -402,7 +436,7 @@ static void restart_settings_test() {
 int main(int argc, char** argv) {
     try {
         if (argc != 2 && argc != 3) {
-            throw std::runtime_error("Usage: afs_8ch_ui_render <output_directory>");
+            throw std::runtime_error("Usage: pd_8ch_ui_render <output_directory>");
         }
         check(CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED));
         restart_settings_test();

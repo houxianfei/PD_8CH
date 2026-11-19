@@ -6,14 +6,14 @@ $vsRoot = & $vswhere -version '[16.0,17.0)' -products '*' -requires Microsoft.Vi
 if (-not $vsRoot) {
     throw 'Visual Studio 2019 with v142 C++ tools is required.'
 }
-& (Join-Path $vsRoot 'MSBuild\Current\Bin\MSBuild.exe') (Join-Path $softwareRoot 'afs_8ch_ui_render.vcxproj') /m /nologo /verbosity:minimal /p:Configuration=Release /p:Platform=x64
+& (Join-Path $vsRoot 'MSBuild\Current\Bin\MSBuild.exe') (Join-Path $softwareRoot 'pd_8ch_ui_render.vcxproj') /m /nologo /verbosity:minimal /p:Configuration=Release /p:Platform=x64
 if ($LASTEXITCODE -ne 0) {
     throw 'Benchmark build failed.'
 }
 if (-not $OutputDirectory) {
     $OutputDirectory = Join-Path $softwareRoot 'build\performance_after'
 }
-& (Join-Path $softwareRoot 'build\v1.4.0\Release\afs_8ch_ui_render.exe') $OutputDirectory --benchmark
+& (Join-Path $softwareRoot 'build\PD_8CH_v1.0.0\Release\pd_8ch_ui_render.exe') $OutputDirectory --benchmark
 if ($LASTEXITCODE -ne 0) {
     throw 'Performance benchmark failed.'
 }

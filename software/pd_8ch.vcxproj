@@ -25,9 +25,9 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup>
-    <OutDir>$(ProjectDir)build\v1.4.0\$(Configuration)\</OutDir>
-    <IntDir>$(ProjectDir)build\obj\afs_8ch\$(Configuration)\</IntDir>
-    <TargetName>afs_8ch</TargetName>
+    <OutDir>$(ProjectDir)build\PD_8CH_v1.0.0\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)build\obj\pd_8ch\$(Configuration)\</IntDir>
+    <TargetName>pd_8ch</TargetName>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup>
@@ -53,9 +53,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="app\afs_gui.cpp" />
+    <ClCompile Include="app\pd_gui.cpp" />
     <ClCompile Include="src\ui\ui.cpp" />
-    <ClCompile Include="src\driver\afs_driver.cpp" />
+    <ClCompile Include="src\driver\pd_driver.cpp" />
     <ClCompile Include="src\driver\internal\protocol.cpp" />
     <ClCompile Include="src\driver\internal\simulation_transport.cpp" />
     <ClCompile Include="src\driver\internal\usb2_transport.cpp" />
@@ -68,11 +68,11 @@
     <ClCompile Include="third_party\implot\implot.cpp" />
     <ClCompile Include="third_party\implot\implot_items.cpp" />
     <ClInclude Include="app\app_version.h" />
-    <ClInclude Include="include\afs\afs_driver.h" />
+    <ClInclude Include="include\pd\pd_driver.h" />
     <ClInclude Include="src\ui\ui.h" />
     <ClInclude Include="src\driver\internal\protocol.h" />
     <ClInclude Include="src\driver\internal\transport.h" />
-    <ResourceCompile Include="app\afs_gui.rc" />
+    <ResourceCompile Include="app\pd_gui.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Target Name="CopyD2XXRuntime" AfterTargets="Build">

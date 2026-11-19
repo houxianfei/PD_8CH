@@ -1,6 +1,6 @@
 # 硬件接口和完整引脚
 
-目标 FPGA：**Cyclone IV E EP4CE6E22C8（E22封装）**。顶层：[rtl/AFS.v](../rtl/AFS.v)；引脚唯一来源：[par/AFS.qsf](../par/AFS.qsf)；时序约束：[par/AFS.sdc](../par/AFS.sdc)。当前28个顶层信号均已分配，不存在待补的下层板输入管脚。
+目标 FPGA：**Cyclone IV E EP4CE6E22C8（E22封装）**。顶层：[rtl/PD.v](../rtl/PD.v)；引脚唯一来源：[par/PD.qsf](../par/PD.qsf)；时序约束：[par/PD.sdc](../par/PD.sdc)。当前28个顶层信号均已分配，不存在待补的下层板输入管脚。
 
 以下 `PIN_x` 是FPGA封装引脚编号，不是板卡连接器针脚号。更换板卡时应按原理图同步调整QSF和本表，不能仅凭连接器位置照搬。
 
@@ -57,7 +57,7 @@ FT232H通过USB连接主机，FPGA通过8bit并行FIFO连接FT232H。此USB接�
 
 QSF当前默认I/O standard为 **2.5 V**，未使用管脚输入三态。该值描述现有工程配置，不表示任意FT232H/ADC板都可直接接入；换板时对照原理图、VCCIO和接口电平复核。
 
-SDC定义20.000ns系统时钟、16.667ns FTDI时钟和25MHz ADC生成时钟，包含USB/SPI外部延时、ADC延迟两拍捕获约束，以及跨域Gray指针16.667ns最大网络延时约束。`scripts/check_timing.tcl`只检查综合网表的时钟和约束端点；完整编译的 `AFS.sta.rpt` 才包含布局布线时序结果。
+SDC定义20.000ns系统时钟、16.667ns FTDI时钟和25MHz ADC生成时钟，包含USB/SPI外部延时、ADC延迟两拍捕获约束，以及跨域Gray指针16.667ns最大网络延时约束。`scripts/check_timing.tcl`只检查综合网表的时钟和约束端点；完整编译的 `PD.sta.rpt` 才包含布局布线时序结果。
 
 当前完整编译报告的setup/hold等汇总裕量为正，但Unconstrained Output Ports仍列出 `spiclk`（生成时钟所在的输出端口未设独立output-delay）。详见[验证记录](validation.md)。更换板卡或调整SPI时序时应复核这个时钟输出路径和外部预算；不要将“管脚齐全”或“Compilation Successful”解释为所有板级路径已实测。
 

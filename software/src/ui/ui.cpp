@@ -13,7 +13,7 @@
 #include <limits>
 #include <vector>
 
-namespace AFS {
+namespace PD {
 ui::ui(bool persist_settings, const std::filesystem::path& config_directory) {
     if (!persist_settings) {
         driver_.search_devices();
@@ -26,7 +26,7 @@ ui::ui(bool persist_settings, const std::filesystem::path& config_directory) {
         GetModuleFileNameW(nullptr, executable, static_cast<DWORD>(std::size(executable)));
         config_directory_ = std::filesystem::path(executable).parent_path() / L"cfg";
     }
-    ini_path_ = config_directory_ / L"afs_8ch.ini";
+    ini_path_ = config_directory_ / L"pd_8ch.ini";
     calibration_path_ = config_directory_ / L"calibration.cfg";
     std::error_code error;
     if (std::filesystem::exists(ini_path_, error)) {
@@ -48,15 +48,6 @@ ui::ui(bool persist_settings, const std::filesystem::path& config_directory) {
         }
     } else if (std::filesystem::exists(calibration_path_, error)) {
         load_calibration(calibration_path_, calibration_, calibration_status_);
-    } else if (config_directory.empty()) {
-        PWSTR legacy_directory = nullptr;
-        if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &legacy_directory))) {
-            const auto legacy = std::filesystem::path(legacy_directory) / L"AFS 8CH/calibration.txt";
-            CoTaskMemFree(legacy_directory);
-            if (std::filesystem::exists(legacy, error) && load_calibration(legacy, calibration_, calibration_status_)) {
-                calibration_status_ = "Imported previous calibration. Save calibration exports it to the displayed cfg file.";
-            }
-        }
     }
     saved_settings_ = ini_load_failed_ ? serialize_ui_settings(settings()) : std::string{};
     if (simulation_) {
@@ -209,6 +200,17 @@ void ui::connection(const Snapshot& snapshot) {
     ImGui::EndDisabled();
     ImGui::Text("State: %s%s", state_name(snapshot.state), snapshot.busy ? "..." : "");
     ImGui::TextWrapped("%s", snapshot.status.c_str());
+    ImGui::Text("Software version: %s", PD_APP_VERSION);
+    if (snapshot.connected) {
+        if (snapshot.has_firmware_version) {
+            ImGui::Text("Firmware version: %s%s", format_firmware_version(snapshot.firmware_version).c_str(),
+                snapshot.driver_mode == DriverMode::Simulation ? " (simulated)" : "");
+        } else {
+            ImGui::TextWrapped("Firmware version: Unknown (version register unavailable)");
+        }
+    } else {
+        ImGui::TextDisabled("Firmware version: Not connected");
+    }
     if (!snapshot.error.empty()) {
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.45f, 0.38f, 1));
         ImGui::TextWrapped("%s", snapshot.error.c_str());
@@ -352,7 +354,7 @@ void ui::load_calibration_dialog() {
     OPENFILENAMEW dialog{};
     dialog.lStructSize = sizeof(dialog);
     dialog.hwndOwner = GetActiveWindow();
-    dialog.lpstrFilter = L"Calibration files (*.cfg;*.txt)\0*.cfg;*.txt\0All files\0*.*\0\0";
+    dialog.lpstrFilter = L"PD calibration files (*.cfg)\0*.cfg\0All files\0*.*\0\0";
     dialog.lpstrFile = filename;
     dialog.nMaxFile = static_cast<DWORD>(std::size(filename));
     dialog.lpstrInitialDir = config_directory_.empty() ? nullptr : config_directory_.c_str();
@@ -381,16 +383,16 @@ void ui::save(const Snapshot& snapshot) {
             std::filesystem::path directory = csv_directory_;
             PWSTR documents = nullptr;
             if (directory.empty() && SUCCEEDED(SHGetKnownFolderPath(FOLDERID_Documents, 0, nullptr, &documents))) {
-                directory = std::filesystem::path(documents) / L"AFS 8CH";
+                directory = std::filesystem::path(documents) / L"PD 8CH";
                 CoTaskMemFree(documents);
             } else if (directory.empty()) {
-                directory = std::filesystem::temp_directory_path() / L"AFS 8CH";
+                directory = std::filesystem::temp_directory_path() / L"PD 8CH";
             }
             std::filesystem::create_directories(directory);
             SYSTEMTIME time{};
             GetLocalTime(&time);
             wchar_t filename[32768]{};
-            swprintf_s(filename, L"AFS8CH_%04u%02u%02u_%02u%02u%02u.csv", time.wYear, time.wMonth,
+            swprintf_s(filename, L"PD8CH_%04u%02u%02u_%02u%02u%02u.csv", time.wYear, time.wMonth,
                 time.wDay, time.wHour, time.wMinute, time.wSecond);
             OPENFILENAMEW dialog{};
             dialog.lStructSize = sizeof(dialog);
@@ -410,7 +412,7 @@ void ui::save(const Snapshot& snapshot) {
                 options.calibration = calibration_;
                 options.selected = show_channel_;
                 options.calibration_file = calibration_path_.u8string();
-                options.software_version = AFS_APP_VERSION;
+                options.software_version = PD_APP_VERSION;
                 saving_ = std::async(std::launch::async, [path, data = std::move(export_snapshot), options] {
                     std::string error;
                     if (!save_realtime_csv(path, data, options, error)) {
@@ -621,7 +623,7 @@ void ui::draw(const Snapshot& snapshot) {
     ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x + 8, viewport->WorkPos.y + 8), ImGuiCond_FirstUseEver);
     const float main_width = std::clamp(viewport->WorkSize.x * 0.4f, 350.0f, 520.0f);
     ImGui::SetNextWindowSize(ImVec2(main_width, viewport->WorkSize.y - 16), ImGuiCond_FirstUseEver);
-    const bool expanded = ImGui::Begin("Main UI / " AFS_APP_TITLE "###MainUI", &open_, ImGuiWindowFlags_MenuBar);
+    const bool expanded = ImGui::Begin("Main UI / " PD_APP_TITLE "###MainUI", &open_, ImGuiWindowFlags_MenuBar);
     if (!open_) {
         ImGui::End();
         return;

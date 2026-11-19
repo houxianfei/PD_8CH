@@ -34,6 +34,9 @@ localparam ADDR_SAMPLE_INTERVAL=8'hF0;
 localparam ADDR_SAMPLE_CONTROL=8'hF1;
 localparam ADDR_SAMPLE_NUMBER=8'hF2;
 localparam ADDR_SAMPLE_DONE=8'hF3;
+localparam ADDR_FIRMWARE_VERSION = 8'hF4;
+// PD firmware 1.0.0: {reserved[7:0], major[7:0], minor[7:0], patch[7:0]}.
+localparam [31:0] FIRMWARE_VERSION = 32'h00010000;
 reg [31:0] interval_reg;
 reg done_reg;
 reg aw_pending;
@@ -132,6 +135,8 @@ always @(posedge S_AXI_ACLK or negedge S_AXI_ARESETN)
                             S_AXI_RDATA <= sample_number;
                         ADDR_SAMPLE_DONE:
                             S_AXI_RDATA <= {31'd0,done_reg};
+                        ADDR_FIRMWARE_VERSION:
+                            S_AXI_RDATA <= FIRMWARE_VERSION;
                         default: ;
                     endcase
             end

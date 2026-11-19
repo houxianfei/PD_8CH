@@ -3,6 +3,11 @@ publish/
 .vs/
 *.user
 *.suo
-cfg/afs_8ch.ini
+cfg/pd_8ch.ini
 cfg/calibration.cfg
 cfg/*.tmp
+
+# Legacy AFS user settings remain local and are never imported.
+cfg/afs_8ch.ini
+cfg/afs_8ch.ini.invalid.*
+cfg/pd_8ch.ini.invalid.*

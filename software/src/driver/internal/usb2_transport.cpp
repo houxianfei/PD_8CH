@@ -8,7 +8,7 @@
 #include <stdexcept>
 #include <thread>
 
-namespace AFS::internal {
+namespace PD::internal {
 namespace {
 void check(FT_STATUS status, const char* operation) {
     if (status != FT_OK) {

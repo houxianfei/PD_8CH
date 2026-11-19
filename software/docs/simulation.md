@@ -1,10 +1,10 @@
-# 无硬件演示与 SDK 调用（v1.4.0）
+# 无硬件演示与 SDK 调用（v1.0.0）
 
 仿真模式不需要板卡或安装系统 USB 驱动。请保留程序附带的 `ftd2xx.dll`；它是应用程序依赖库，不是系统驱动。安装版的 USB 2.0 Driver 页面可选择 **Skip**，也可直接使用免安装版。
 
 ## 在界面中演示
 
-1. 启动 `afs_8ch.exe`。Main UI 的 **Mode** 选择 **Simulation**，自动搜索到 **SIM-8CH**；需要时点击 **Search simulation** 重新搜索。
+1. 启动 `pd_8ch.exe`。Main UI 的 **Mode** 选择 **Simulation**，自动搜索到 **SIM-8CH**；需要时点击 **Search simulation** 重新搜索。
 2. 选择 **SIM-8CH**，点击 **Connect**。界面显示 `SIMULATION` 提示，数据为生成的演示信号。
 3. 点击 **Get**，一次读取八个通道。重复点击可观察变化；未开始采集时 Get 不产生可导出的采样缓存。
 4. Main UI 将 CH1 的 **Name** 改为 `Demo probe A`，**P0=2**、**P1=3**；Power 和曲线统一使用 `P1 * (P0 + ADC)`。可通过 Save calibration / Save As... 保存文件，再用 Load calibration 恢复。
@@ -18,10 +18,10 @@
 
 ## 直接调用 SDK
 
-SDK 公共接口为 `include/afs/afs_driver.h`，无需包含内部传输类。创建模拟 SDK 后，连接、Get、采集、读取、停止和导出接口与硬件模式相同：
+SDK 公共接口为 `include/pd/pd_driver.h`，无需包含内部传输类。创建模拟 SDK 后，连接、Get、采集、读取、停止和导出接口与硬件模式相同：
 
 ```cpp
-AFS::af_driver sdk(AFS::DriverMode::Simulation);
+PD::pd_driver sdk(PD::DriverMode::Simulation);
 sdk.search_devices();
 // 轮询 DataCollection_read()，等待 busy=false，再读取 devices。
 sdk.open("SIM-8CH");
@@ -37,18 +37,18 @@ sdk.close();
 
 SDK 操作为异步请求。不要只用固定 sleep 判断完成；轮询 `busy`、状态和 `error`，并设置等待超时。完整可运行示例为 [simulation_demo.cpp](../examples/simulation_demo.cpp)，其中包含等待、错误处理、有限/连续采集、导出、停止后重启、清空和模式切换。
 
-现有默认构造 `AFS::af_driver sdk;` 仍使用USB。也可在断开时调用 `set_connection_mode(AFS::DriverMode::Simulation)`，等待 `busy=false` 后重新搜索并连接。连接期间切换模式会返回错误并保留当前连接。读取快照里的 `driver_mode` 为当前连接模式，`acquisition_mode` 为缓存所属的数据来源。
+现有默认构造 `PD::pd_driver sdk;` 仍使用USB。也可在断开时调用 `set_connection_mode(PD::DriverMode::Simulation)`，等待 `busy=false` 后重新搜索并连接。连接期间切换模式会返回错误并保留当前连接。读取快照里的 `driver_mode` 为当前连接模式，`acquisition_mode` 为缓存所属的数据来源。
 
 ## 运行命令行示例
 
 解压免安装包后，在该目录的 PowerShell 中执行：
 
 ```powershell
-./afs_8ch_simulation_demo.exe ./simulation_demo.csv
+./pd_8ch_simulation_demo.exe ./simulation_demo.csv
 ```
 
 控制台依次显示搜索、连接/Get、100Hz有限采集、选通道校准导出、连续采集/停止/清空/断开和模式切换。成功时退出码为0，CSV包含100帧CH1、CH3模拟数据，不会搜索或打开真实USB设备。SDK示例切到USB模式时仅创建断开的传输对象，不做枚举或连接。
 
-从源码构建：在项目根目录运行 `./software/scripts/build.ps1 -Configuration Release -Test`，或使用 VS2019 打开 `software/afs_8ch.sln`，构建 `afs_8ch_simulation_demo`。输出位于 `software/build/v1.4.0/Release/`。示例工程直接编译本工程驱动源码；本版本未单独提供二进制SDK DLL。
+从源码构建：在项目根目录运行 `./software/scripts/build.ps1 -Configuration Release -Test`，或使用 VS2019 打开 `software/pd_8ch.sln`，构建 `pd_8ch_simulation_demo`。输出位于 `software/build/PD_8CH_v1.0.0/Release/`。示例工程直接编译本工程驱动源码；本版本未单独提供二进制SDK DLL。
 
 仿真通过独立传输实现真实时间调度、寄存器应答、双组上传帧和CRC，复用 SDK 后台线程、跨读取帧缓存、解析器及采集生命周期。UI未另写一套波形采集逻辑。

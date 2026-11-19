@@ -6,13 +6,13 @@ $vsRoot = & $vswhere -version '[16.0,17.0)' -products '*' -requires Microsoft.Vi
 if (-not $vsRoot) {
     throw 'Visual Studio 2019 with v142 C++ tools is required.'
 }
-& (Join-Path $vsRoot 'MSBuild\Current\Bin\MSBuild.exe') (Join-Path $softwareRoot 'afs_8ch_ui_render.vcxproj') /m /nologo /verbosity:minimal "/p:Configuration=$Configuration" /p:Platform=x64
+& (Join-Path $vsRoot 'MSBuild\Current\Bin\MSBuild.exe') (Join-Path $softwareRoot 'pd_8ch_ui_render.vcxproj') /m /nologo /verbosity:minimal "/p:Configuration=$Configuration" /p:Platform=x64
 if ($LASTEXITCODE -ne 0) {
     throw 'UI renderer build failed.'
 }
 $output = Join-Path $softwareRoot 'build\ui_qa'
 New-Item -ItemType Directory -Force -Path $output | Out-Null
-& (Join-Path $softwareRoot "build\v1.4.0\$Configuration\afs_8ch_ui_render.exe") $output
+& (Join-Path $softwareRoot "build\PD_8CH_v1.0.0\$Configuration\pd_8ch_ui_render.exe") $output
 if ($LASTEXITCODE -ne 0) {
     throw 'UI rendering verification failed.'
 }

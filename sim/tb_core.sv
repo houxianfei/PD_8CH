@@ -12,7 +12,7 @@ wire [63:0] tx_tdata;
 wire [7:0] tx_tkeep;
 wire tx_tvalid,tx_tlast;
 reg tx_tready=0;
-AFS_core dut (.*);
+PD_core dut (.*);
 reg [63:0] records[0:4095];
 reg lasts[0:4095];
 integer received=0, frames=0, replies=0;
@@ -107,6 +107,9 @@ initial begin
     repeat(4) @(negedge clk); rst_n=1;
     for(n=0;n<8;n=n+1) rd(n,n*16'h1111);
     rd(8'h80,0);
+    rd(8'hF4,32'h00010000);
+    wr(8'hF4,32'hFFFFFFFF);
+    rd(8'hF4,32'h00010000);
     wr(0,32'hDEADBEEF); rd(0,0);
     wr(8'h80,32'hDEADBEEF); rd(8'h80,0);
     wr(8'hF0,32'd2); rd(8'hF0,2);

@@ -25,9 +25,9 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup>
-    <OutDir>$(ProjectDir)build\v1.4.0\$(Configuration)\</OutDir>
-    <IntDir>$(ProjectDir)build\obj\afs_8ch_tests\$(Configuration)\</IntDir>
-    <TargetName>afs_8ch_tests</TargetName>
+    <OutDir>$(ProjectDir)build\PD_8CH_v1.0.0\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)build\obj\pd_8ch_tests\$(Configuration)\</IntDir>
+    <TargetName>pd_8ch_tests</TargetName>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup>
@@ -54,11 +54,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="tests\test_main.cpp" />
-    <ClCompile Include="src\driver\afs_driver.cpp" />
+    <ClCompile Include="src\driver\pd_driver.cpp" />
     <ClCompile Include="src\driver\internal\protocol.cpp" />
     <ClCompile Include="src\driver\internal\simulation_transport.cpp" />
     <ClInclude Include="app\app_version.h" />
-    <ClInclude Include="include\afs\afs_driver.h" />
+    <ClInclude Include="include\pd\pd_driver.h" />
     <ClInclude Include="src\ui\ui.h" />
     <ClInclude Include="src\driver\internal\protocol.h" />
     <ClInclude Include="src\driver\internal\transport.h" />

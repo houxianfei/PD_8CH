@@ -1,4 +1,4 @@
-# realtime_measure CSV（v1.4.0）
+# realtime_measure CSV（v1.0.0）
 
 保存按钮为 **Save selected channels (CSV)**。勾选哪些通道，就导出哪些通道；每个通道保留 ADC 和 Power 两列。USB 仍采集八通道，内部缓存也保留八通道，因此可改变勾选后重新导出，不必重新采集。未选任何通道时保存按钮禁用。
 
@@ -50,4 +50,4 @@ python ./software/scripts/verify_csv.py ./software/build/logs/csv_Debug
 python ./software/scripts/verify_csv.py ./software/build/logs/csv_Release
 ```
 
-验证覆盖单选、双选、全选、名称中的逗号/引号、UTC绝对时间、跳号、缓存覆盖后的数据范围、采集中保存及校准值。旧 SDK 原始九列/十七列导出函数仅用于兼容调用，GUI 不再使用这些相对时间格式。
+验证覆盖单选、双选、全选、名称中的逗号/引号、UTC绝对时间、跳号、缓存覆盖后的数据范围、采集中保存及校准值。SDK另提供原始九列/十七列导出函数，GUI 不再使用这些相对时间格式。

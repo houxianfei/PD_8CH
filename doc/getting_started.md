@@ -14,9 +14,9 @@ git status
 
 | 要打开的工程 | 文件 | 作用 |
 |---|---|---|
-| FPGA | `par/AFS.qpf` | Quartus工程，顶层AFS，器件EP4CE6E22C8 |
-| 上位机和SDK例程 | `software/afs_8ch.sln` | VS2019解决方案，选择x64 |
-| SDK公共接口 | `software/include/afs/afs_driver.h` | C++驱动、快照、采集、校准和CSV接口 |
+| FPGA | `par/PD.qpf` | Quartus工程，顶层PD，器件EP4CE6E22C8 |
+| 上位机和SDK例程 | `software/pd_8ch.sln` | VS2019解决方案，选择x64 |
+| SDK公共接口 | `software/include/pd/pd_driver.h` | C++驱动、快照、采集、校准和CSV接口 |
 | SDK演示源码 | `software/examples/simulation_demo.cpp` | 无硬件执行完整SDK操作流程 |
 
 `.tools/`、`par/output_files/`、`sim/build/`、`software/build/`、`software/publish/`、VS缓存和用户ini被Git忽略。新 clone 没有开发者本机的工具、SOF、EXE或安装包；按下文构建会生成它们。普通测试也无需重新生成 `sim/reference_vectors.vh`。
@@ -48,13 +48,13 @@ Quartus脚本默认安装目录为 `C:/intelFPGA_lite/22.1std/quartus`。若路�
 ./software/scripts/build.ps1 -Configuration Release -Test
 ```
 
-脚本构建三个项目：GUI `afs_8ch`、测试 `afs_8ch_tests`、命令行SDK演示 `afs_8ch_simulation_demo`，然后执行C++测试和SDK演示。输出：
+脚本构建三个项目：GUI `pd_8ch`、测试 `pd_8ch_tests`、命令行SDK演示 `pd_8ch_simulation_demo`，然后执行C++测试和SDK演示。输出：
 
 | 路径 | 内容 |
 |---|---|
-| `software/build/v1.4.0/Release/afs_8ch.exe` | GUI程序 |
-| `software/build/v1.4.0/Release/afs_8ch_simulation_demo.exe` | SDK操作示例 |
-| `software/build/v1.4.0/Release/ftd2xx.dll` | 随构建复制的FTDI用户态库 |
+| `software/build/PD_8CH_v1.0.0/Release/pd_8ch.exe` | GUI程序 |
+| `software/build/PD_8CH_v1.0.0/Release/pd_8ch_simulation_demo.exe` | SDK操作示例 |
+| `software/build/PD_8CH_v1.0.0/Release/ftd2xx.dll` | 随构建复制的FTDI用户态库 |
 | `software/build/logs/build_Release.log` | MSBuild日志 |
 | `software/build/logs/test_Release.log` | C++测试结果，成功末行为ALL TESTS PASSED |
 | `software/build/logs/sdk_demo_Release.log`、`.csv` | SDK演示输出与100帧模拟数据 |
@@ -64,7 +64,7 @@ EXE要与 `ftd2xx.dll` 一起使用，Simulation也需保留此DLL。系统D2XX�
 ### 3.2 界面演示
 
 ```powershell
-./software/build/v1.4.0/Release/afs_8ch.exe
+./software/build/PD_8CH_v1.0.0/Release/pd_8ch.exe
 ```
 
 1. 在Main UI将 **Mode** 选为 **Simulation**，选中 **SIM-8CH**，点击 **Connect**。界面明确显示SIMULATION。
@@ -81,10 +81,10 @@ EXE要与 `ftd2xx.dll` 一起使用，Simulation也需保留此DLL。系统D2XX�
 ### 3.3 不打开界面，直接调用SDK
 
 ```powershell
-./software/build/v1.4.0/Release/afs_8ch_simulation_demo.exe ./software/build/logs/my_demo.csv
+./software/build/PD_8CH_v1.0.0/Release/pd_8ch_simulation_demo.exe ./software/build/logs/my_demo.csv
 ```
 
-成功时控制台打印六步操作并返回0。例程构造 `AFS::af_driver(AFS::DriverMode::Simulation)`，通过公开API搜索、连接、Get、有限/连续采集、导出、清空、断开及切换模式。所有异步操作都等待状态并检查错误，不搜索或打开真实USB设备。此例程直接编译SDK源码，仓库未单独发布SDK DLL。
+成功时控制台打印六步操作并返回0。例程构造 `PD::pd_driver(PD::DriverMode::Simulation)`，通过公开API搜索、连接、Get、有限/连续采集、导出、清空、断开及切换模式。所有异步操作都等待状态并检查错误，不搜索或打开真实USB设备。此例程直接编译SDK源码，仓库未单独发布SDK DLL。
 
 ## 4. 验证并编译固件
 
@@ -111,15 +111,15 @@ EXE要与 `ftd2xx.dll` 一起使用，Simulation也需保留此DLL。系统D2XX�
 
 两条命令选择符合本机路径的一条即可。该流程依次完成：管脚检查、Analysis & Synthesis、Fitter、Assembler、Timing Analyzer。当前所有管脚已分配，**完整编译是正常支持的流程**，不再预期因下层板缺管脚而失败。
 
-也可用Quartus打开 `par/AFS.qpf`，确认Revision=AFS、Top-level entity=AFS、Device=EP4CE6E22C8，再点 **Processing → Start Compilation**。GUI同样执行PRE_FLOW管脚检查。
+也可用Quartus打开 `par/PD.qpf`，确认Revision=PD、Top-level entity=PD、Device=EP4CE6E22C8，再点 **Processing → Start Compilation**。GUI同样执行PRE_FLOW管脚检查。
 
 | 生成文件 | 用途 |
 |---|---|
-| `par/output_files/AFS.sof` | JTAG配置FPGA |
-| `AFS.flow.rpt` | 完整流程状态 |
-| `AFS.fit.summary` / `AFS.fit.rpt` | 布局布线和资源占用 |
-| `AFS.pin` | 最终管脚报告，可与QSF和原理图对照 |
-| `AFS.sta.summary` / `AFS.sta.rpt` | 布局布线后的时序汇总和详情 |
+| `par/output_files/PD.sof` | JTAG配置FPGA |
+| `PD.flow.rpt` | 完整流程状态 |
+| `PD.fit.summary` / `PD.fit.rpt` | 布局布线和资源占用 |
+| `PD.pin` | 最终管脚报告，可与QSF和原理图对照 |
+| `PD.sta.summary` / `PD.sta.rpt` | 布局布线后的时序汇总和详情 |
 
 表中短文件名均在 `par/output_files/` 下。脚本成功返回后，还应阅读时序和约束报告；当前已知报告项和数值见[验证记录](validation.md)。
 
@@ -130,7 +130,7 @@ EXE要与 `ftd2xx.dll` 一起使用，Simulation也需保留此DLL。系统D2XX�
 ./scripts/build.ps1 -Mode timing
 ```
 
-timing模式检查三个时钟、128个ADC捕获寄存器和FIFO Gray指针约束端点，并生成 `AFS.clocks.rpt`、`AFS.cdc_nets.rpt`。脚本请求 `-post_map`；干净综合后使用综合网表，如果已经运行Fitter，Quartus会提示忽略-post_map并使用可用网表。这是约束端点检查，不是完整时序签核，不能替代compile生成的STA报告。更换安装路径时两条命令都加 `-QuartusRoot`。
+timing模式检查三个时钟、128个ADC捕获寄存器和FIFO Gray指针约束端点，并生成 `PD.clocks.rpt`、`PD.cdc_nets.rpt`。脚本请求 `-post_map`；干净综合后使用综合网表，如果已经运行Fitter，Quartus会提示忽略-post_map并使用可用网表。这是约束端点检查，不是完整时序签核，不能替代compile生成的STA报告。更换安装路径时两条命令都加 `-QuartusRoot`。
 
 ## 5. 下载固件并连接板卡
 
@@ -138,9 +138,9 @@ timing模式检查三个时钟、128个ADC捕获寄存器和FIFO Gray指针约�
 
 准备板卡电源和JTAG下载器（例如USB-Blaster），安装下载器自身驱动。**JTAG下载器驱动与FT232H采集用D2XX驱动不同**。
 
-1. 完成上一节编译，确认 `par/output_files/AFS.sof` 是本次源码生成的文件。
+1. 完成上一节编译，确认 `par/output_files/PD.sof` 是本次源码生成的文件。
 2. 在Quartus **Tools → Programmer** 中选择对应Hardware，模式选JTAG，点击Auto Detect。
-3. 确认检测器件与EP4CE6E22C8一致，给该器件选择 `AFS.sof`，勾选Program/Configure后执行Start。
+3. 确认检测器件与EP4CE6E22C8一致，给该器件选择 `PD.sof`，勾选Program/Configure后执行Start。
 4. 观察配置完成，再复位板卡；确认50MHz系统时钟、FT232H 60MHz FIFO时钟和低有效复位符合[硬件接口](hardware.md)。
 
 SOF配置是易失的，断电后消失。若需掉电自动启动，在Quartus Convert Programming Files中按**实际配置Flash型号、模式和板卡接法**转换JIC/POF等文件；本仓库没有通用Flash转换配置，build脚本只保证生成SOF。不要把其他电脑的CDF绝对路径或旧JIC文件当成本次构建结果。
@@ -159,7 +159,7 @@ pnputil.exe /add-driver './software/driver/CDM/ftdibus.inf' /install
 
 1. 确认板卡运行本仓库固件，ADC与USB接线按完整QSF；板卡供电并用USB数据线连接FT232H。
 2. 启动上位机，断开现有仿真连接，将 **Mode** 改为 **USB 2.0 / FT232H**。
-3. 点击 **Search USB**，选择实际序列号，再 **Connect**。这里只枚举FT232H；若连接失败先看界面英文错误提示。
+3. 点击 **Search USB**，选择实际序列号，再 **Connect**。连接后核对Main UI的Software version和Firmware version（当前均为1.0.0，固件版本由设备读取）。这里只枚举FT232H；若连接失败先看界面英文错误提示。
 4. 点击 **Get** 读取全部八个寄存器。默认P0=0、P1=1，Power应与ADC相同；输入已知信号检查通道映射。
 5. 先以100Hz、1秒有限采集确认100帧、八通道及CRC/跳号计数，再尝试1kHz或Continue。有限模式结束后应保持连接；Stop后可以再次Start。
 6. 需要导出的通道保持勾选，停止后保存CSV以取得正式采集结束时间。采集中也可保存快照，此时acquisition_end字段为空，data_start/data_end仍填写。
@@ -175,11 +175,11 @@ pnputil.exe /add-driver './software/driver/CDM/ftdibus.inf' /install
 | 1MSPS | ADC内部转换速率，不是UI上传频率 |
 | 1kHz / 100Hz / 10Hz / 1Hz | USB上传频率；模拟模式也按实际时间调度 |
 | 通道勾选 | 控制独立子图和CSV列；内部始终缓存全部八通道 |
-| `cfg/afs_8ch.ini` | EXE旁自动保存UI参数、模式、窗口布局；重新打开自动恢复 |
+| `cfg/pd_8ch.ini` | EXE旁自动保存UI参数、模式、窗口布局；重新打开自动恢复 |
 | `cfg/calibration.cfg`或自选文件 | Save calibration/Save As导出的名称与P0/P1；Load calibration可加载 |
 | CSV | 当前完整保留缓存中的所选通道，ADC与校准后的Power，名称、参数、绝对UTC与采集元数据 |
 
-开发构建的cfg在EXE所在的 `software/build/v1.4.0/Release/` 下，不是源码中的 `software/cfg/`；后者提供发布默认文件。源码/便携版放在可写目录，安装版为程序cfg目录设置写权限。
+开发构建的cfg在EXE所在的 `software/build/PD_8CH_v1.0.0/Release/` 下，不是源码中的 `software/cfg/`；后者提供发布默认文件。源码/便携版放在可写目录，安装版为程序cfg目录设置写权限。
 
 缓存上限65536帧，超出后覆盖最早数据。绘图最多显示最近1500帧，CSV可保存全部保留缓存。导出时使用当前名称和校准系数重新计算Power。绝对UTC为主机开始时间加设备相对计时；它不是额外硬件授时精度声明。[CSV详情](../software/docs/csv_format.md)。
 
@@ -205,9 +205,9 @@ python ./software/scripts/verify_csv.py ./software/build/logs/csv_Release
 
 选择符合本机路径的一条。默认编译器路径为 `$env:LOCALAPPDATA/Programs/Inno Setup 6/ISCC.exe`。脚本重新执行Release构建/测试，再生成：
 
-- `software/publish/AFS_8CH_Setup_v1.4.0.exe`
-- `software/publish/AFS_8CH_v1.4.0_portable.zip`
-- `software/publish/AFS_8CH_v1.4.0/` 完整程序目录
+- `software/publish/PD_8CH_Setup_v1.0.0.exe`
+- `software/publish/PD_8CH_v1.0.0_portable.zip`
+- `software/publish/PD_8CH_v1.0.0/` 完整程序目录
 - `software/publish/SHA256.txt`
 
 软件包含GUI、SDK演示、FTDI应用DLL、完整签名驱动、许可证、默认cfg及软件文档，**不包含FPGA SOF**。若要交付可直接联调的一套材料，应另附由同一提交编译的SOF及提交号。publish在.gitignore中，`git push`不会上传这些安装包；如需GitHub下载，应另行发布Release附件。
@@ -233,7 +233,7 @@ python ./software/scripts/verify_csv.py ./software/build/logs/csv_Release
 
 ## 9. 修改和维护入口
 
-固件实现说明见[协议与源码职责](firmware_protocol.md#实现入口)，软件入口为 `software/app/afs_gui.cpp`、UI在 `software/src/ui/`、SDK/USB/仿真传输在 `software/src/driver/`。新增接口时同步维护QSF、SDC、管脚检查、仿真和文档，保留既有顶层命名与通道顺序。
+固件实现说明见[协议与源码职责](firmware_protocol.md#实现入口)，软件入口为 `software/app/pd_gui.cpp`、UI在 `software/src/ui/`、SDK/USB/仿真传输在 `software/src/driver/`。新增接口时同步维护QSF、SDC、管脚检查、仿真和文档，保留既有顶层命名与通道顺序。
 
 只有维护黄金向量时才需要额外参考仓库；普通构建不需要。已准备固定提交 `ae1a285` 后可显式运行：
 

@@ -1,10 +1,10 @@
 # Eight-channel AD7380 / FT232H. Reference: afs_v1 ae1a285.
 set_global_assignment -name FAMILY "Cyclone IV E"
 set_global_assignment -name DEVICE EP4CE6E22C8
-set_global_assignment -name TOP_LEVEL_ENTITY AFS
+set_global_assignment -name TOP_LEVEL_ENTITY PD
 set_global_assignment -name LAST_QUARTUS_VERSION "22.1std.1 Lite Edition"
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
-set_global_assignment -name SDC_FILE AFS.sdc
+set_global_assignment -name SDC_FILE PD.sdc
 set_global_assignment -name PRE_FLOW_SCRIPT_FILE "quartus_sh:../scripts/check_pins.tcl"
 set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED"
 set_global_assignment -name ENABLE_CONFIGURATION_PINS OFF
@@ -12,8 +12,8 @@ set_global_assignment -name ENABLE_NCE_PIN OFF
 set_global_assignment -name ENABLE_BOOT_SEL_PIN OFF
 set_global_assignment -name USE_CONFIGURATION_DEVICE OFF
 set_global_assignment -name CYCLONEII_RESERVE_NCEO_AFTER_CONFIGURATION "USE AS REGULAR IO"
-set_global_assignment -name VERILOG_FILE ../rtl/AFS.v
-set_global_assignment -name VERILOG_FILE ../rtl/AFS_core.v
+set_global_assignment -name VERILOG_FILE ../rtl/PD.v
+set_global_assignment -name VERILOG_FILE ../rtl/PD_core.v
 set_global_assignment -name VERILOG_FILE ../rtl/axis_fifo.v
 set_global_assignment -name VERILOG_FILE ../rtl/axis_frame_arbiter.v
 set_global_assignment -name VERILOG_FILE ../rtl/control_register.v

@@ -1,4 +1,4 @@
-AFS 8CH v1.4.0
+PD 8CH v1.0.0
 
 Windows 10 / 11 x64. Hardware: FT232H USB 2.0 synchronous 245 FIFO.
 
@@ -8,7 +8,7 @@ driver page if using simulation only. Keep the bundled ftd2xx.dll.
 Get, acquisition, calibration, plots and CSV work through the same SDK.
 Generated data is labelled SIMULATION in the UI and data_source=simulation
 in CSV. See docs\simulation.md for steps, or run
-afs_8ch_simulation_demo.exe simulation_demo.csv for a console SDK demo.
+pd_8ch_simulation_demo.exe simulation_demo.csv for a console SDK demo.
 
 The USB 2.0 Driver page asks whether to install the signed FTDI D2XX/CDM
 2.12.36.4 package included in driver\CDM. Installation is recommended by
@@ -20,7 +20,7 @@ Use Get to update all eight ADC values. During acquisition, Get uses
 the most recent complete frame without interrupting the stream.
 
 Edit Name, P0 and P1 in Main UI. Power = P1 * (P0 + ADC).
-UI parameters are saved automatically in cfg\afs_8ch.ini for the next launch.
+UI parameters are saved automatically in cfg\pd_8ch.ini for the next launch.
 Save calibration exports cfg\calibration.cfg; Save As... selects another file.
 Load calibration imports a saved file. Main UI displays the selected calibration file path; the default UI INI path stays hidden.
 Defaults are CH0-CH7, P0=0, P1=1. No physical energy unit is assumed.
@@ -39,6 +39,11 @@ The renderer host stays hidden; there is no outer background window.
 
 See README.md and docs for build, protocol and driver details.
 Hardware integration and target-machine driver installation have not been tested.
+
+PD is an independent product and does not import legacy AFS settings.
+Calibration loading accepts only PD8CH_CALIBRATION_V2 files.
+Main UI shows Software version and Firmware version separately.
+The firmware version is read at connection and cached during acquisition.
 
 With Continue unchecked, set Duration (s). Finite collection stops automatically
 and keeps USB connected, including when a missing/corrupt final frame causes

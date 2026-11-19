@@ -1,7 +1,7 @@
 # Invoked by Quartus full-flow compile, including GUI compilation.
 # Synthesis-only (quartus_map) does not invoke this full-flow check.
 set script_dir [file dirname [file normalize [info script]]]
-set qsf [file join $script_dir .. par AFS.qsf]
+set qsf [file join $script_dir .. par PD.qsf]
 set fh [open $qsf r]
 set text [read $fh]
 close $fh
