@@ -1,5 +1,5 @@
 # Invoked by Quartus full-flow compile, including GUI compilation.
-# Analysis & Synthesis (quartus_map) intentionally remains available without board pins.
+# Synthesis-only (quartus_map) does not invoke this full-flow check.
 set script_dir [file dirname [file normalize [info script]]]
 set qsf [file join $script_dir .. par AFS.qsf]
 set fh [open $qsf r]

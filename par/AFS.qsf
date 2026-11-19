@@ -63,7 +63,7 @@ set_location_assignment PIN_137 -to usb_data[5]
 set_location_assignment PIN_136 -to usb_data[6]
 set_location_assignment PIN_135 -to usb_data[7]
 set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "2.5 V"
-# TODO: spidiB[0..3] require actual board pin assignments.
+# All 28 top-level signals have explicit board pin assignments.
 set_global_assignment -name NUM_PARALLEL_PROCESSORS 4
 
 set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS INPUT TRI-STATED"

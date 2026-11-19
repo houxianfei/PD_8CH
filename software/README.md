@@ -2,6 +2,8 @@
 
 八通道 USB 2.0 信号采集软件，基于 `E:\AFS\afs_gui1.0\afs_gui` 的 C++ / Dear ImGui / ImPlot 技术栈精简开发。保留旧版 `realtime_measure` 的独立窗口、纵向子图和实时文本形式。
 
+第一次clone请先看[整机首次使用指南](../doc/getting_started.md)。上述开发机路径只是来源记录；构建需要的依赖已在本仓库，无需取得原GUI工程。新clone没有build/publish产物，先构建再运行；当前完整固件引脚表见[硬件接口](../doc/hardware.md)。
+
 ## 使用
 
 **没有硬件时**：Main UI 的 **Mode → Simulation**，选择 **SIM-8CH → Connect**。Get、有限/连续采集、逐通道绘图、校准和CSV均可演示，无需安装系统USB驱动。完整界面步骤与SDK调用见 [仿真演示说明](docs/simulation.md)，也可运行 `afs_8ch_simulation_demo.exe simulation_demo.csv`。模拟数据在UI及CSV中明确标记。默认仍为USB模式，模式自动保存，断开后才能切换。
@@ -52,8 +54,17 @@ timestamp_utc,"CH1 [Probe A] ADC","CH1 [Probe A] Power","CH3 [Probe B] ADC","CH3
 
 需要 Windows x64、Visual Studio 2019 C++ 桌面开发工具（v142）和 Windows 10 SDK。
 
+脚本通过vswhere只选择VS2019（16.x），不能仅安装VS2022后直接照用脚本。三个解决方案项目分别是GUI、测试和SDK命令行演示；离屏UI验证工程由ui_qa.ps1单独构建。默认Release构建后可运行：
+
 ```powershell
-# 在 project_0 目录执行，编译并运行 Debug / Release 测试
+./software/scripts/build.ps1 -Configuration Release -Test
+./software/build/v1.4.0/Release/afs_8ch.exe
+```
+
+保留EXE旁的ftd2xx.dll。开发构建自动ini位于EXE旁cfg目录；源码software/cfg用于提供发布默认配置，不是运行时自动ini目录。
+
+```powershell
+# 在克隆后的仓库根目录执行，编译并运行 Debug / Release 测试
 ./software/scripts/build.ps1 -Configuration All -Test
 
 # 不需要硬件或操作桌面的图形渲染验证
@@ -64,6 +75,8 @@ timestamp_utc,"CH1 [Probe A] ADC","CH1 [Probe A] Power","CH3 [Probe B] ADC","CH3
 ```
 
 工程入口 `software/afs_8ch.sln`。程序输出在 `software/build/v1.4.0/Release/`；安装包和免安装压缩包输出在 `software/publish/`。内部协议/生命周期测试、离屏绘图测试均不链接实际 USB 实现，不能触发硬件操作。
+
+工具安装、非默认路径参数、CSV独立校验、实际硬件连接和打包输出详见[首次使用指南](../doc/getting_started.md)。publish目录不提交Git；当前源码仓库不包含可直接下载的安装包。使用者可本机构建，维护者也可另外发布GitHub Release附件。
 
 查看 [协议说明](docs/protocol.md)、[验证记录](docs/validation.md)、[驱动来源及校验值](driver/SOURCE.json)、[基线文件清单](docs/source_manifest.json)。
 
