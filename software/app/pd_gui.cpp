@@ -24,6 +24,18 @@ static UINT g_ResizeHeight = 0;
 static ID3D11RenderTargetView* g_mainRenderTargetView = nullptr;
 static void (*g_render_window)(ImGuiViewport*, void*) = nullptr;
 static void (*g_present_window)(ImGuiViewport*, void*) = nullptr;
+static void (*g_create_window)(ImGuiViewport*) = nullptr;
+
+static void CreateWindowWithIcon(ImGuiViewport* viewport) {
+    g_create_window(viewport);
+    const auto window = static_cast<HWND>(viewport->PlatformHandle);
+    const auto instance = GetModuleHandleW(nullptr);
+    const auto largeIcon = LoadIconW(instance, MAKEINTRESOURCEW(101));
+    const auto smallIcon = static_cast<HICON>(LoadImageW(instance, MAKEINTRESOURCEW(101), IMAGE_ICON,
+        GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_SHARED));
+    SendMessageW(window, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(largeIcon));
+    SendMessageW(window, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(smallIcon));
+}
 
 static void RenderWindowTimed(ImGuiViewport* viewport, void* argument) {
     PD::performance::Scope timing(PD::performance::Stage::RenderViewports);
@@ -50,6 +62,9 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR arguments, int) {
     wc.style = CS_CLASSDC;
     wc.lpfnWndProc = WndProc;
     wc.hInstance = instance;
+    wc.hIcon = LoadIconW(instance, MAKEINTRESOURCEW(101));
+    wc.hIconSm = static_cast<HICON>(LoadImageW(instance, MAKEINTRESOURCEW(101), IMAGE_ICON,
+        GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_SHARED));
     wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
     wc.lpszClassName = L"PD8CHWindow";
     RegisterClassExW(&wc);
@@ -82,6 +97,8 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR arguments, int) {
         io.Fonts->AddFontFromFileTTF(font.u8string().c_str(), 18.0f);
     }
     ImGui_ImplWin32_Init(hwnd);
+    g_create_window = ImGui::GetPlatformIO().Platform_CreateWindow;
+    ImGui::GetPlatformIO().Platform_CreateWindow = CreateWindowWithIcon;
     ImGui_ImplDX11_Init(g_pd3dDevice, g_pd3dDeviceContext);
     g_render_window = ImGui::GetPlatformIO().Renderer_RenderWindow;
     g_present_window = ImGui::GetPlatformIO().Renderer_SwapBuffers;

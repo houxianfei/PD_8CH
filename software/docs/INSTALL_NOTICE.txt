@@ -21,6 +21,10 @@ the most recent complete frame without interrupting the stream.
 
 Edit Name, P0 and P1 in Main UI. Power = P1 * (P0 + ADC).
 UI parameters are saved automatically in cfg\pd_8ch.ini for the next launch.
+Installation and upgrades preserve existing files in cfg and data, including
+subfolders. Bundled defaults are copied only when the file does not exist.
+Uninstallation keeps both folders and their contents. Both folders are writable
+by local users. CSV exports still use the directory selected in the application.
 Save calibration exports cfg\calibration.cfg; Save As... selects another file.
 Load calibration imports a saved file. Main UI displays the selected calibration file path; the default UI INI path stays hidden.
 Defaults are CH0-CH7, P0=0, P1=1. No physical energy unit is assumed.

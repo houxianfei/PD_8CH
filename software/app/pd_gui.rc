@@ -1,6 +1,8 @@
 #include <windows.h>
 #pragma code_page(65001)
 
+101 ICON "assets\\pd_icon.ico"
+
 1 VERSIONINFO
 FILEVERSION 1,0,0,0
 PRODUCTVERSION 1,0,0,0

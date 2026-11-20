@@ -19,16 +19,20 @@ WizardStyle=modern
 CloseApplications=yes
 CloseApplicationsFilter=pd_8ch.exe
 InfoBeforeFile=..\docs\INSTALL_NOTICE.txt
+SetupIconFile=..\app\assets\pd_icon.ico
+UninstallDisplayIcon={app}\pd_8ch.exe
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a desktop shortcut"; Flags: unchecked
 
 [Files]
-Source: "..\publish\PD_8CH_v{#AppVersion}\*"; DestDir: "{app}"; Excludes: "cfg\*"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\publish\PD_8CH_v{#AppVersion}\cfg\*"; DestDir: "{app}\cfg"; Flags: onlyifdoesntexist uninsneveruninstall
+Source: "..\publish\PD_8CH_v{#AppVersion}\*"; DestDir: "{app}"; Excludes: "cfg\*,data\*"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\publish\PD_8CH_v{#AppVersion}\cfg\*"; DestDir: "{app}\cfg"; Flags: onlyifdoesntexist uninsneveruninstall recursesubdirs createallsubdirs
+Source: "..\publish\PD_8CH_v{#AppVersion}\data\*"; DestDir: "{app}\data"; Flags: onlyifdoesntexist uninsneveruninstall recursesubdirs createallsubdirs skipifsourcedoesntexist
 
 [Dirs]
 Name: "{app}\cfg"; Permissions: users-modify; Flags: uninsneveruninstall
+Name: "{app}\data"; Permissions: users-modify; Flags: uninsneveruninstall
 
 [Icons]
 Name: "{group}\PD 8CH"; Filename: "{app}\pd_8ch.exe"
