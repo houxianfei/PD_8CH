@@ -200,7 +200,8 @@ void ui::connection(const Snapshot& snapshot) {
     ImGui::EndDisabled();
     ImGui::Text("State: %s%s", state_name(snapshot.state), snapshot.busy ? "..." : "");
     ImGui::TextWrapped("%s", snapshot.status.c_str());
-    ImGui::Text("Software version: %s", PD_APP_VERSION);
+    ImGui::Text("Software version: %s, ", PD_APP_VERSION);
+    ImGui::SameLine();
     if (snapshot.connected) {
         if (snapshot.has_firmware_version) {
             ImGui::Text("Firmware version: %s%s", format_firmware_version(snapshot.firmware_version).c_str(),
